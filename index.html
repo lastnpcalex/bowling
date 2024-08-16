@@ -3,100 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bowling Score Simulator</title>
+    <title>Bowling Simulator</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
+            background-color: #0d0d0d;
+            color: #00ff99;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
-        .frame {
-            display: inline-block;
-            width: 50px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            margin: 5px;
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #00ccff;
+            text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff;
+        }
+
+        a {
+            text-decoration: none;
+            color: #00ff99;
+            background-color: #1a1a1a;
+            padding: 10px 20px;
+            border: 2px solid #00ff99;
+            border-radius: 5px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        a:hover {
+            background-color: #00ff99;
+            color: #0d0d0d;
+            border-color: #00ccff;
+            text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff;
+        }
+
+        .neon-box {
+            padding: 30px;
+            border: 2px solid #00ff99;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 20px #00ccff, 0 0 30px #00ff99;
             text-align: center;
-        }
-        .total-score {
-            margin-top: 20px;
-            font-size: 24px;
         }
     </style>
 </head>
 <body>
 
-<h2>Bowling Score Simulator</h2>
-<label for="strike">Strike Percentage:</label>
-<input type="number" id="strike" min="0" max="100" value="30"> %<br><br>
-<label for="spare">Spare Percentage:</label>
-<input type="number" id="spare" min="0" max="100" value="50"> %<br><br>
-<button onclick="simulateGame()">Simulate Game</button>
-
-<h3>Frames:</h3>
-<div id="frames"></div>
-<div class="total-score" id="total-score"></div>
-
-<script>
-    function simulateFrame(strikePercentage, sparePercentage) {
-        let firstRoll = Math.random() < strikePercentage ? 10 : Math.floor(Math.random() * 10);
-        let secondRoll = 0;
-        if (firstRoll < 10) {
-            secondRoll = Math.random() < sparePercentage ? 10 - firstRoll : Math.floor(Math.random() * (10 - firstRoll));
-        }
-        let result = firstRoll === 10 ? "Strike" : (firstRoll + secondRoll === 10 ? "Spare" : "Open");
-        return { firstRoll, secondRoll, result };
-    }
-
-    function calculateScore(frames) {
-        let score = 0;
-        for (let i = 0; i < 10; i++) {
-            score += frames[i].firstRoll + frames[i].secondRoll;
-            if (frames[i].result === "Strike") {
-                score += frames[i + 1]?.firstRoll || 0;
-                score += frames[i + 1]?.secondRoll || (frames[i + 2]?.firstRoll || 0);
-            } else if (frames[i].result === "Spare") {
-                score += frames[i + 1]?.firstRoll || 0;
-            }
-        }
-        return score;
-    }
-
-    function simulateGame() {
-        let strikePercentage = parseInt(document.getElementById("strike").value) / 100;
-        let sparePercentage = parseInt(document.getElementById("spare").value) / 100;
-
-        let frames = [];
-        for (let i = 0; i < 10; i++) {
-            frames.push(simulateFrame(strikePercentage, sparePercentage));
-        }
-
-        // Handle the 10th frame
-        if (frames[9].result === "Strike") {
-            frames.push(simulateFrame(strikePercentage, sparePercentage));
-            frames.push(simulateFrame(strikePercentage, sparePercentage));
-        } else if (frames[9].result === "Spare") {
-            frames.push(simulateFrame(strikePercentage, sparePercentage));
-        }
-
-        displayFrames(frames);
-        document.getElementById("total-score").innerText = "Total Score: " + calculateScore(frames);
-    }
-
-    function displayFrames(frames) {
-        let framesContainer = document.getElementById("frames");
-        framesContainer.innerHTML = "";
-        for (let i = 0; i < 10; i++) {
-            let frameDiv = document.createElement("div");
-            frameDiv.className = "frame";
-            frameDiv.innerHTML = `
-                <div>${frames[i].firstRoll}</div>
-                <div>${frames[i].secondRoll}</div>
-                <div>${frames[i].result}</div>
-            `;
-            framesContainer.appendChild(frameDiv);
-        }
-    }
-</script>
+<div class="neon-box">
+    <h1>Bowling Simulator Hub</h1>
+    <a href="bowling-simulator.html">Bowling Simulator</a><br>
+    <a href="interactive-score-sheet.html">Interactive Score Sheet</a><br>
+    <a href="score-analysis.html">Score Analysis</a>
+</div>
 
 </body>
 </html>
