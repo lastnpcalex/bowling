@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bowling Simulator</title>
+    <style>
+        body {
+            background-color: #0d0d0d;
+            color: #00ff99;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 0 20px #00ccff, 0 0 30px #00ff99;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #00ccff;
+            text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff;
+        }
+
+        label {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #00ff99;
+            border-radius: 5px;
+            background-color: #1a1a1a;
+            color: #00ff99;
+            font-size: 1.1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2rem;
+            background-color: #00ff99;
+            color: #0d0d0d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #00ccff;
+            color: #0d0d0d;
+        }
+
+        .result {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Bowling Simulator</h1>
+
+    <label for="strike-percentage">Strike Percentage (e.g., 11% for amateurs):</label>
+    <input type="number" id="strike-percentage" placeholder="Enter your strike percentage" value="11">
+
+    <label for="spare-percentage">Spare Percentage (e.g., 35% for amateurs):</label>
+    <input type="number" id="spare-percentage" placeholder="Enter your spare percentage" value="35">
+
+    <label for="simulations">Number of Simulations (30-1000):</label>
+    <input type="number" id="simulations" placeholder="Enter number of games to simulate" value="100">
+
+    <button id="simulate-button">Simulate Games</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+    // JavaScript to handle the simulation will go here
+    document.getElementById('simulate-button').addEventListener('click', function() {
+        const strikePercentage = parseFloat(document.getElementById('strike-percentage').value);
+        const sparePercentage = parseFloat(document.getElementById('spare-percentage').value);
+        const simulations = parseInt(document.getElementById('simulations').value);
+
+        if (isNaN(strikePercentage) || isNaN(sparePercentage) || isNaN(simulations) ||
+            strikePercentage < 0 || strikePercentage > 100 ||
+            sparePercentage < 0 || sparePercentage > 100 ||
+            simulations < 30 || simulations > 1000) {
+            document.getElementById('result').innerText = "Please enter valid percentages and simulation count.";
+            return;
+        }
+
+        // For now, just display the inputs; simulation logic will be added next
+        document.getElementById('result').innerText = `Simulating ${simulations} games with ${strikePercentage}% strikes and ${sparePercentage}% spares...`;
+    });
+</script>
+
+</body>
+</html>
