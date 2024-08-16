@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bowling Simulator</title>
+    <title>LastNPCAlex's Bowling Hub</title>
     <style>
         body {
             background-color: #0d0d0d;
@@ -18,14 +18,37 @@
             height: 100vh;
         }
 
-        h1 {
-            font-size: 3rem;
+        .neon-box {
+            padding: 30px;
+            border: 2px solid #00ff99;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 20px #00ccff, 0 0 30px #00ff99;
+            text-align: center;
+        }
+
+        .title-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 20px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
             color: #00ccff;
             text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff;
+            margin: 0 10px;
+        }
+
+        .title-container img {
+            width: 50px;
+            height: 50px;
+            margin: 0 10px;
         }
 
         a {
+            display: block;
             text-decoration: none;
             color: #00ff99;
             background-color: #1a1a1a;
@@ -43,22 +66,18 @@
             text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff;
         }
 
-        .neon-box {
-            padding: 30px;
-            border: 2px solid #00ff99;
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.7);
-            box-shadow: 0 0 20px #00ccff, 0 0 30px #00ff99;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
 
 <div class="neon-box">
-    <h1>Bowling Simulator Hub</h1>
-    <a href="bowling-simulator.html">Bowling Simulator</a><br>
-    <a href="interactive-score-sheet.html">Interactive Score Sheet</a><br>
+    <div class="title-container">
+        <img src="11-50-09-660_512.webp" alt="Bowling GIF">
+        <h1>LastNPCAlex's Bowling Hub</h1>
+        <img src="11-50-09-660_512.webp" alt="Bowling GIF">
+    </div>
+    <a href="bowling-simulator.html">Bowling Simulator</a>
+    <a href="interactive-score-sheet.html">Interactive Score Sheet</a>
     <a href="score-analysis.html">Score Analysis</a>
 </div>
 
