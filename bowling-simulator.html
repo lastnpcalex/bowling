@@ -36,7 +36,7 @@
         }
 
         input[type="number"] {
-            width: 100px; /* Adjusted width */
+            width: 100px;
             padding: 10px;
             margin-bottom: 20px;
             border: 2px solid #00ff99;
@@ -141,6 +141,16 @@
         .score-sheet tr:nth-child(even) {
             background-color: #1a1a1a;
         }
+
+        .strike {
+            background-color: #ff0000;
+            color: #fff;
+        }
+
+        .spare {
+            background-color: #00ff00;
+            color: #000;
+        }
     </style>
 </head>
 <body>
@@ -172,93 +182,88 @@
 
 <script>
     function simulateBowlingGame(strikePercentage, sparePercentage) {
-        // Simple simulation of a game
         const frames = 10;
         let score = 0;
         let frameScores = [];
-        for (let i = 0; i < frames; i++) {
-            const firstRoll = Math.floor(Math.random() * 11); // Random pins from 0 to 10
-            const secondRoll = (firstRoll < 10) ? Math.floor(Math.random() * (11 - firstRoll)) : 0;
+        let rolls = [];
+        let currentRoll = 0;
 
-            let frameScore = firstRoll + secondRoll;
+        for (let i = 0; i < frames; i++) {
+            let firstRoll = Math.floor(Math.random() * 11);
+            let secondRoll = 0;
+
             if (firstRoll === 10) { // Strike
-                frameScore += Math.floor(Math.random() * 11); // Bonus roll
-            } else if (frameScore === 10) { // Spare
-                frameScore += Math.floor(Math.random() * 11); // Bonus roll
+                rolls.push(10);
+                secondRoll = 0;
+            } else {
+                secondRoll = Math.floor(Math.random() * (11 - firstRoll));
+                rolls.push(firstRoll + secondRoll);
             }
 
-            frameScores.push(frameScore);
-            score += frameScore;
+            frameScores.push(firstRoll + secondRoll);
+
+            if (firstRoll === 10) { // Strike
+                score += 10 + (rolls[currentRoll + 1] || 0) + (rolls[currentRoll + 2] || 0);
+            } else if (firstRoll + secondRoll === 10) { // Spare
+                score += 10 + (rolls[currentRoll + 2] || 0);
+            } else { // Open frame
+                score += firstRoll + secondRoll;
+            }
+            currentRoll++;
         }
-        return {score, frameScores};
+
+        return { score, frameScores, rolls };
     }
 
     function generateRepresentativeGame(averageScore) {
-        // Generate a representative game for average score
-        let {score, frameScores} = simulateBowlingGame(50); // Simulate a game with arbitrary average
+        let representativeGame = simulateBowlingGame(50, 50); // You can adjust the percentage for better results
+        let frames = representativeGame.frameScores;
+        let rolls = representativeGame.rolls;
 
-        return `
-            <div class="score-sheet">
-                <h2>Representative Game</h2>
-                <table>
-                    <tr>
-                        <th>Frame</th>
-                        <th>Score</th>
-                    </tr>
-                    ${frameScores.map((score, index) => `
-                        <tr>
-                            <td>Frame ${index + 1}</td>
-                            <td>${score}</td>
-                        </tr>
-                    `).join('')}
-                    <tr>
-                        <th>Total Score</th>
-                        <th>${score}</th>
-                    </tr>
-                </table>
-            </div>
-        `;
+        let html = '<div class="score-sheet"><h2>Representative Game</h2><table><tr><th>Frame</th><th>Roll 1</th><th>Roll 2</th><th>Score</th></tr>';
+        for (let i = 0; i < 10; i++) {
+            let roll1 = i * 2 < rolls.length ? rolls[i * 2] : '-';
+            let roll2 = i * 2 + 1 < rolls.length ? rolls[i * 2 + 1] : '-';
+            let score = frames[i] || 0;
+
+            html += `<tr${roll1 == 10 ? ' class="strike"' : roll1 + roll2 == 10 ? ' class="spare"' : ''}>
+                        <td>${i + 1}</td>
+                        <td>${roll1}</td>
+                        <td>${roll2}</td>
+                        <td>${score}</td>
+                    </tr>`;
+        }
+        html += '</table><p><strong>Final Score:</strong> ' + representativeGame.score + '</p></div>';
+
+        return html;
     }
 
-    document.getElementById('simulate-button').addEventListener('click', function() {
-        const strikePercentage = parseFloat(document.getElementById('strike-percentage').value);
-        const sparePercentage = parseFloat(document.getElementById('spare-percentage').value);
-        const simulations = parseInt(document.getElementById('simulations').value);
+    document.getElementById('simulate-button').addEventListener('click', () => {
+        const strikePercentage = parseFloat(document.getElementById('strike-percentage').value) || 0;
+        const sparePercentage = parseFloat(document.getElementById('spare-percentage').value) || 0;
+        const numSimulations = parseInt(document.getElementById('simulations').value) || 100;
 
-        if (isNaN(strikePercentage) || isNaN(sparePercentage) || isNaN(simulations) ||
-            strikePercentage < 0 || strikePercentage > 100 ||
-            sparePercentage < 0 || sparePercentage > 100 ||
-            simulations < 30 || simulations > 1000) {
-            document.getElementById('result').innerText = "Please enter valid percentages and simulation count.";
-            return;
-        }
+        const progressBarInner = document.getElementById('progress-bar-inner');
+        progressBarInner.style.width = '0%';
 
-        // Reset progress bar and result text
-        document.getElementById('progress-bar-inner').style.width = '0%';
-        document.getElementById('result').innerText = `Simulating ${simulations} games...`;
-
+        let completedSimulations = 0;
         let totalScore = 0;
-        let completed = 0;
-        const interval = setInterval(() => {
-            if (completed < simulations) {
-                const {score} = simulateBowlingGame(strikePercentage, sparePercentage);
-                totalScore += score;
-                completed += 1;
-
-                const progress = (completed / simulations) * 100;
-                document.getElementById('progress-bar-inner').style.width = progress + '%';
-                document.getElementById('progress-bar-inner').innerText = Math.floor(progress) + '%';
+        let simulationInterval = setInterval(() => {
+            if (completedSimulations < numSimulations) {
+                const result = simulateBowlingGame(strikePercentage, sparePercentage);
+                totalScore += result.score;
+                completedSimulations++;
+                progressBarInner.style.width = `${(completedSimulations / numSimulations) * 100}%`;
+                progressBarInner.textContent = `${Math.round((completedSimulations / numSimulations) * 100)}%`;
             } else {
-                clearInterval(interval);
-
-                const averageScore = totalScore / simulations;
+                clearInterval(simulationInterval);
+                const averageScore = totalScore / numSimulations;
                 document.getElementById('result').innerHTML = `
-                    Simulation completed!<br>
-                    Average score is ${averageScore.toFixed(2)}.<br>
+                    <p>Simulation completed! Average score is ${averageScore.toFixed(2)}.</p>
                     ${generateRepresentativeGame(averageScore)}
                 `;
             }
-        }, 50); // Adjust this for faster/slower simulation
+        }, 50);
     });
 </script>
 
