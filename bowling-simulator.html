@@ -36,7 +36,7 @@
         }
 
         input[type="number"] {
-            width: 100%;
+            width: 100px; /* Adjusted width */
             padding: 10px;
             margin-bottom: 20px;
             border: 2px solid #00ff99;
@@ -145,6 +145,13 @@
 </div>
 
 <script>
+    function simulateBowlingGame(strikePercentage, sparePercentage) {
+        // This function simulates a single game and returns the score
+        // Note: Implement the detailed simulation logic here
+        // Placeholder score for demonstration purposes
+        return Math.floor(Math.random() * 300); // Random score between 0 and 300
+    }
+
     document.getElementById('simulate-button').addEventListener('click', function() {
         const strikePercentage = parseFloat(document.getElementById('strike-percentage').value);
         const sparePercentage = parseFloat(document.getElementById('spare-percentage').value);
@@ -162,20 +169,36 @@
         document.getElementById('progress-bar-inner').style.width = '0%';
         document.getElementById('result').innerText = `Simulating ${simulations} games...`;
 
-        // Simulate games (simplified, actual logic will depend on your algorithm)
+        let totalScore = 0;
         let completed = 0;
         const interval = setInterval(() => {
-            completed += 1;
-            const progress = (completed / simulations) * 100;
-            document.getElementById('progress-bar-inner').style.width = progress + '%';
-            document.getElementById('progress-bar-inner').innerText = Math.floor(progress) + '%';
+            if (completed < simulations) {
+                const score = simulateBowlingGame(strikePercentage, sparePercentage);
+                totalScore += score;
+                completed += 1;
 
-            if (completed === simulations) {
+                const progress = (completed / simulations) * 100;
+                document.getElementById('progress-bar-inner').style.width = progress + '%';
+                document.getElementById('progress-bar-inner').innerText = Math.floor(progress) + '%';
+            } else {
                 clearInterval(interval);
-                document.getElementById('result').innerText = `Simulation completed! Average score is...`; // Calculate actual average
+
+                const averageScore = totalScore / simulations;
+                document.getElementById('result').innerHTML = `
+                    Simulation completed!<br>
+                    Average score: ${Math.round(averageScore)}<br>
+                    <h2>Representative Game</h2>
+                    ${generateRepresentativeGame(averageScore)}
+                `;
             }
         }, 10); // Speed of the progress bar (adjust as necessary)
     });
+
+    function generateRepresentativeGame(averageScore) {
+        // This function generates and returns a representative game score sheet
+        // Note: Implement the detailed logic here
+        return "<p>Details of the representative game based on the average score...</p>";
+    }
 </script>
 
 </body>
