@@ -115,6 +115,32 @@
             visibility: visible;
             opacity: 1;
         }
+
+        .score-sheet {
+            font-size: 1rem;
+            text-align: left;
+            margin-top: 20px;
+        }
+
+        .score-sheet table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .score-sheet th, .score-sheet td {
+            border: 1px solid #00ff99;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .score-sheet th {
+            background-color: #00ccff;
+            color: #000;
+        }
+
+        .score-sheet tr:nth-child(even) {
+            background-color: #1a1a1a;
+        }
     </style>
 </head>
 <body>
@@ -146,10 +172,52 @@
 
 <script>
     function simulateBowlingGame(strikePercentage, sparePercentage) {
-        // This function simulates a single game and returns the score
-        // Note: Implement the detailed simulation logic here
-        // Placeholder score for demonstration purposes
-        return Math.floor(Math.random() * 300); // Random score between 0 and 300
+        // Simple simulation of a game
+        const frames = 10;
+        let score = 0;
+        let frameScores = [];
+        for (let i = 0; i < frames; i++) {
+            const firstRoll = Math.floor(Math.random() * 11); // Random pins from 0 to 10
+            const secondRoll = (firstRoll < 10) ? Math.floor(Math.random() * (11 - firstRoll)) : 0;
+
+            let frameScore = firstRoll + secondRoll;
+            if (firstRoll === 10) { // Strike
+                frameScore += Math.floor(Math.random() * 11); // Bonus roll
+            } else if (frameScore === 10) { // Spare
+                frameScore += Math.floor(Math.random() * 11); // Bonus roll
+            }
+
+            frameScores.push(frameScore);
+            score += frameScore;
+        }
+        return {score, frameScores};
+    }
+
+    function generateRepresentativeGame(averageScore) {
+        // Generate a representative game for average score
+        let {score, frameScores} = simulateBowlingGame(50); // Simulate a game with arbitrary average
+
+        return `
+            <div class="score-sheet">
+                <h2>Representative Game</h2>
+                <table>
+                    <tr>
+                        <th>Frame</th>
+                        <th>Score</th>
+                    </tr>
+                    ${frameScores.map((score, index) => `
+                        <tr>
+                            <td>Frame ${index + 1}</td>
+                            <td>${score}</td>
+                        </tr>
+                    `).join('')}
+                    <tr>
+                        <th>Total Score</th>
+                        <th>${score}</th>
+                    </tr>
+                </table>
+            </div>
+        `;
     }
 
     document.getElementById('simulate-button').addEventListener('click', function() {
@@ -173,7 +241,7 @@
         let completed = 0;
         const interval = setInterval(() => {
             if (completed < simulations) {
-                const score = simulateBowlingGame(strikePercentage, sparePercentage);
+                const {score} = simulateBowlingGame(strikePercentage, sparePercentage);
                 totalScore += score;
                 completed += 1;
 
@@ -186,19 +254,12 @@
                 const averageScore = totalScore / simulations;
                 document.getElementById('result').innerHTML = `
                     Simulation completed!<br>
-                    Average score: ${Math.round(averageScore)}<br>
-                    <h2>Representative Game</h2>
+                    Average score is ${averageScore.toFixed(2)}.<br>
                     ${generateRepresentativeGame(averageScore)}
                 `;
             }
-        }, 10); // Speed of the progress bar (adjust as necessary)
+        }, 50); // Adjust this for faster/slower simulation
     });
-
-    function generateRepresentativeGame(averageScore) {
-        // This function generates and returns a representative game score sheet
-        // Note: Implement the detailed logic here
-        return "<p>Details of the representative game based on the average score...</p>";
-    }
 </script>
 
 </body>
