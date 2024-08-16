@@ -1,0 +1,163 @@
+body {
+    background-color: #0d0d0d;
+    color: #00ff99;
+    font-family: 'Courier New', Courier, monospace;
+    margin: 0;
+    padding: 20px;
+}
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 10px;
+    box-shadow: 0 0 20px #00ccff, 0 0 30px #00ff99;
+}
+h1, h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #00ccff;
+    text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff;
+}
+h2 {
+    font-size: 2rem;
+    margin-top: 20px;
+}
+label {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    display: block;
+}
+input[type="number"] {
+    width: 100px;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 2px solid #00ff99;
+    border-radius: 5px;
+    background-color: #1a1a1a;
+    color: #00ff99;
+    font-size: 1.1rem;
+}
+button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.2rem;
+    background-color: #00ff99;
+    color: #0d0d0d;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+button:hover {
+    background-color: #00ccff;
+    color: #0d0d0d;
+}
+.result {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 1.5rem;
+}
+.progress-bar {
+    width: 100%;
+    background-color: #333;
+    border-radius: 5px;
+    margin-top: 20px;
+    overflow: hidden;
+}
+.progress-bar-inner {
+    width: 0;
+    height: 20px;
+    background-color: #00ff99;
+    text-align: center;
+    line-height: 20px;
+    color: #000;
+    transition: width 0.3s ease;
+}
+.score-sheet {
+    margin-top: 20px;
+    background-color: #0d0d0d;
+    padding: 10px;
+    overflow-x: auto;
+}
+.frames-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    border: 1px solid #00ff99;
+}
+.frame {
+    border: 1px solid #00ff99;
+    border-right: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-sizing: border-box;
+    width: 60px;
+    height: 60px; /* Increased height for better visibility */
+    margin-right: -1px;
+}
+.frame:nth-child(10) {
+    border-right: 1px solid #00ff99;
+    width: 90px; /* Wider 10th frame */
+}
+.frame-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px;
+    box-sizing: border-box;
+    height: 60%;
+    border-bottom: 1px solid #00ff99;
+}
+.frame-bottom {
+    text-align: center;
+    font-size: 18px;
+    padding: 2px;
+    box-sizing: border-box;
+    height: 40%;
+}
+.roll1, .roll2, .roll3 {
+    font-size: 18px;
+    color: #00ff99;
+    width: 20px;
+    text-align: center;
+}
+.roll2, .roll3 {
+    border-left: 1px solid #00ff99;
+}
+.strike {
+    background-color: #ff0000;
+    color: #fff;
+}
+.spare {
+    background-color: #00ff00;
+    color: #000;
+}
+/* Tooltip Styles */
+.tooltip {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+    border-bottom: 1px dotted #00ff99;
+}
+.tooltip .tooltiptext {
+    visibility: hidden;
+    width: 200px;
+    background-color: #1a1a1a;
+    color: #00ff99;
+    text-align: center;
+    border-radius: 5px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+    bottom: 125%; 
+    left: 50%;
+    margin-left: -100px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+.tooltip:hover .tooltiptext {
+    visibility: visible;
+    opacity: 1;
+}
