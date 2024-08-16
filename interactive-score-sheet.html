@@ -1,95 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Interactive Bowling Scoresheet</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        #input-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-        }
-        #roll-info {
-            margin-bottom: 10px;
-            font-size: 1.2em;
-            color: #00ccff;
-        }
-        #input-buttons {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        #input-buttons button {
-            width: auto;
-            padding: 10px 15px;
-            margin: 5px;
-        }
-        .frame.selected {
-            box-shadow: 0 0 10px #00ff99;
-        }
-        .instructions {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #00ccff;
-        }
-        #game-label {
-            margin-top: 20px;
-            text-align: center;
-        }
-        #game-label input {
-            margin-top: 10px;
-        }
-        #download-button {
-            margin-top: 10px;
-        }
-        #file-input-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-        #file-input-container input[type="file"] {
-            display: none;
-        }
-        #file-input-container label {
-            padding: 10px 15px;
-            background-color: #00ff99;
-            color: #0d0d0d;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        #file-input-container label:hover {
-            background-color: #00ccff;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Bowling Scoresheet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .score-sheet {
+            margin-top: 20px;
+        }
+        .frames-container {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .frame {
+            width: 9%;
+            border: 1px solid #ccc;
+            text-align: center;
+        }
+        .tenth-frame {
+            width: 11%;
+        }
+        .frame-top {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #ccc;
+        }
+        .frame-top span {
+            width: 50%;
+            padding: 5px;
+            font-size: 14px;
+        }
+        .tenth-frame .frame-top span {
+            width: 33.33%;
+        }
+        .frame-bottom {
+            padding: 5px;
+            font-weight: bold;
+        }
+        #input-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #roll-info {
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            color: #00ccff;
+        }
+        #input-buttons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 300px;
+        }
+        #input-buttons button {
+            width: 40px;
+            height: 40px;
+            padding: 5px;
+            margin: 3px;
+            font-size: 14px;
+            background-color: #00ff99;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #input-buttons button:hover {
+            background-color: #00ccff;
+        }
+        .frame.selected {
+            box-shadow: 0 0 10px #00ff99;
+        }
+        .instructions {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #00ccff;
+        }
+        #game-label {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #game-label input {
+            margin-top: 10px;
+        }
+        #download-button, #file-input-container label {
+            margin-top: 10px;
+            padding: 10px 15px;
+            background-color: #00ff99;
+            color: #0d0d0d;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #download-button:hover, #file-input-container label:hover {
+            background-color: #00ccff;
+        }
+        #file-input-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #file-input-container input[type="file"] {
+            display: none;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Interactive Bowling Scoresheet</h1>
-        <div class="instructions">
-            <p>Click a frame to enter a score. To edit a frame, click it and enter a new score.</p>
-        </div>
-        <div id="scoresheet" class="score-sheet">
-            <div class="frames-container">
-                <!-- Frames will be dynamically added here -->
-            </div>
-        </div>
-        <div id="input-area" style="display: none;">
-            <div id="roll-info"></div>
-            <div id="input-buttons"></div>
-        </div>
-        <div id="game-label">
-            <label for="game-name">Game Label:</label>
-            <input type="text" id="game-name" value="">
-            <button id="download-button">Download Game Data</button>
-        </div>
-        <div id="file-input-container">
-            <label for="load-game">Load Game from JSON</label>
-            <input type="file" id="load-game" accept=".json">
-        </div>
-    </div>
+    <div class="container">
+        <h1>Interactive Bowling Scoresheet</h1>
+        <div class="instructions">
+            <p>Click a frame to enter a score. To edit a frame, click it and enter a new score.</p>
+        </div>
+        <div id="scoresheet" class="score-sheet">
+            <div class="frames-container">
+                <!-- Frames will be dynamically added here -->
+            </div>
+        </div>
+        <div id="input-area" style="display: none;">
+            <div id="roll-info"></div>
+            <div id="input-buttons"></div>
+        </div>
+        <div id="game-label">
+            <label for="game-name">Game Label:</label>
+            <input type="text" id="game-name" value="">
+            <button id="download-button">Download Game Data</button>
+        </div>
+        <div id="file-input-container">
+            <label for="load-game">Load Game from JSON</label>
+            <input type="file" id="load-game" accept=".json">
+        </div>
+    </div>
+
 
 <script>
 const scoresheet = document.getElementById('scoresheet');
