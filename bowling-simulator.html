@@ -4,206 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bowling Simulator</title>
-    <style>
-        body {
-            background-color: #0d0d0d;
-            color: #00ff99;
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 10px;
-            box-shadow: 0 0 20px #00ccff, 0 0 30px #00ff99;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 2.5rem;
-            color: #00ccff;
-            text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff;
-        }
-
-        label {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        input[type="number"] {
-            width: 100px;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: 2px solid #00ff99;
-            border-radius: 5px;
-            background-color: #1a1a1a;
-            color: #00ff99;
-            font-size: 1.1rem;
-        }
-
-        button {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2rem;
-            background-color: #00ff99;
-            color: #0d0d0d;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        button:hover {
-            background-color: #00ccff;
-            color: #0d0d0d;
-        }
-
-        .result {
-            margin-top: 20px;
-            text-align: center;
-            font-size: 1.5rem;
-        }
-
-        .progress-bar {
-            width: 100%;
-            background-color: #333;
-            border-radius: 5px;
-            margin-top: 20px;
-            overflow: hidden;
-        }
-
-        .progress-bar-inner {
-            width: 0;
-            height: 20px;
-            background-color: #00ff99;
-            text-align: center;
-            line-height: 20px;
-            color: #000;
-            transition: width 0.3s ease;
-        }
-
-        .tooltip {
-            display: inline-block;
-            position: relative;
-            cursor: pointer;
-            border-bottom: 1px dotted #00ff99;
-        }
-
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 200px;
-            background-color: #1a1a1a;
-            color: #00ff99;
-            text-align: center;
-            border-radius: 5px;
-            padding: 5px;
-            position: absolute;
-            z-index: 1;
-            bottom: 125%; 
-            left: 50%;
-            margin-left: -100px;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .score-sheet {
-            font-size: 1rem;
-            text-align: left;
-            margin-top: 20px;
-        }
-
-        .score-sheet table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .score-sheet th, .score-sheet td {
-            border: 1px solid #00ff99;
-            padding: 8px;
-            text-align: center;
-        }
-
-        .score-sheet th {
-            background-color: #00ccff;
-            color: #000;
-        }
-
-        .score-sheet tr:nth-child(even) {
-            background-color: #1a1a1a;
-        }
-
-        .strike {
-            background-color: #ff0000;
-            color: #fff;
-        }
-
-        .spare {
-            background-color: #00ff00;
-            color: #000;
-        }
-
-        .slider-container {
-            margin: 20px 0;
-        }
-
-        .slider-label {
-            display: block;
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-
-        .dice-button {
-            font-size: 1.5rem;
-            padding: 10px;
-            background-color: #ffcc00;
-            color: #0d0d0d;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .dice-button:hover {
-            background-color: #ff9900;
-        }
-
-        .download-button {
-            font-size: 1.2rem;
-            padding: 10px;
-            background-color: #00ccff;
-            color: #0d0d0d;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-
-        .download-button:hover {
-            background-color: #0099cc;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <div class="container">
     <h1>Bowling Simulator</h1>
 
-    <label for="strike-percentage">Strike Percentage <span class="tooltip">(ℹ)
+    <label for="strike-percentage">Strike Percentage <span class="tooltip">ℹ
         <span class="tooltiptext">Amateurs: 10-15%, Pros: 60-70%</span>
     </span>:</label>
     <input type="number" id="strike-percentage" placeholder="Enter your strike percentage" value="11">
 
-    <label for="spare-percentage">Spare Percentage <span class="tooltip">(ℹ)
+    <label for="spare-percentage">Spare Percentage <span class="tooltip">ℹ
         <span class="tooltiptext">Amateurs: 30-40%, Pros: 80-90%</span>
     </span>:</label>
     <input type="number" id="spare-percentage" placeholder="Enter your spare percentage" value="35">
@@ -211,17 +24,7 @@
     <label for="simulations">Number of Simulations (30-1000):</label>
     <input type="number" id="simulations" placeholder="Enter number of games to simulate" value="100">
 
-    <div class="slider-container">
-        <label class="slider-label" for="cfg-slider">CFG Value (2-5):</label>
-        <input type="range" id="cfg-slider" min="2" max="5" step="0.1" value="3.5">
-        <div>CFG Value: <span id="cfg-value">3.5</span></div>
-    </div>
-
     <button id="simulate-button">Simulate Games</button>
-
-    <button class="dice-button" id="dice-button">🎲</button>
-
-    <button class="download-button" id="download-button">Download Image</button>
 
     <div class="progress-bar" id="progress-bar">
         <div class="progress-bar-inner" id="progress-bar-inner"></div>
@@ -231,108 +34,184 @@
 </div>
 
 <script>
-    function simulateBowlingGame(strikePercentage, sparePercentage) {
-        const frames = 10;
-        let score = 0;
-        let frameScores = [];
-        let rolls = [];
-        let currentRoll = 0;
+function simulateBowlingGame(strikePercentage, sparePercentage) {
+    const frames = 10;
+    let score = 0;
+    let frameScores = [];
+    let rolls = [];
 
-        for (let i = 0; i < frames; i++) {
-            let firstRoll = Math.floor(Math.random() * 11);
-            let secondRoll = 0;
+    function generateRoll(pinsLeft = 10) {
+        const random = Math.random() * 100;
+        if (pinsLeft === 10 && random < strikePercentage) {
+            return 10;
+        } else {
+            // Adjust probability distribution for non-strike rolls
+            const maxRoll = Math.min(pinsLeft, 9); // Cap at 9 for realism
+            return Math.floor(Math.random() * (maxRoll + 1));
+        }
+    }
 
-            if (firstRoll === 10) { // Strike
-                rolls.push(10);
-                secondRoll = 0;
-            } else {
-                secondRoll = Math.floor(Math.random() * (11 - firstRoll));
-                rolls.push(firstRoll + secondRoll);
+    function isSpare(roll1, roll2) {
+        return roll1 + roll2 === 10 && roll1 !== 10;
+    }
+
+    for (let frame = 0; frame < frames; frame++) {
+        let firstRoll = generateRoll();
+        rolls.push(firstRoll);
+        
+        if (firstRoll < 10 || frame === 9) {
+            let secondRoll = generateRoll(10 - firstRoll);
+            if (frame < 9 && firstRoll + secondRoll === 10) {
+                // Adjust for spare percentage
+                if (Math.random() * 100 >= sparePercentage) {
+                    secondRoll = Math.min(secondRoll, 9 - firstRoll); // Ensure it's not a spare
+                }
             }
+            rolls.push(secondRoll);
+            
+            if (frame === 9 && (firstRoll === 10 || isSpare(firstRoll, secondRoll))) {
+                let thirdRoll = generateRoll();
+                rolls.push(thirdRoll);
+            }
+        }
+    }
 
-            frameScores.push(firstRoll + secondRoll);
-
-            if (firstRoll === 10) { // Strike
-                score += 10 + (rolls[currentRoll + 1] || 0) + (rolls[currentRoll + 2] || 0);
-            } else if (firstRoll + secondRoll === 10) { // Spare
-                score += 10 + (rolls[currentRoll + 2] || 0);
+    let rollIndex = 0;
+    for (let frame = 0; frame < frames; frame++) {
+        let frameScore = 0;
+        
+        if (frame < 9) {
+            if (rolls[rollIndex] === 10) { // Strike
+                frameScore = 10 + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
+                rollIndex += 1;
+            } else if (isSpare(rolls[rollIndex], rolls[rollIndex + 1])) { // Spare
+                frameScore = 10 + (rolls[rollIndex + 2] || 0);
+                rollIndex += 2;
             } else { // Open frame
-                score += firstRoll + secondRoll;
+                frameScore = rolls[rollIndex] + rolls[rollIndex + 1];
+                rollIndex += 2;
             }
-            currentRoll++;
+        } else { // 10th frame
+            frameScore = rolls[rollIndex] + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
+            rollIndex += 3;
         }
-
-        return { score, frameScores, rolls };
+        
+        score += frameScore;
+        frameScores.push(frameScore);
     }
 
-    function generateRepresentativeGame(averageScore) {
-        let representativeGame = simulateBowlingGame(50, 50); // You can adjust the percentage for better results
-        let frames = representativeGame.frameScores;
-        let rolls = representativeGame.rolls;
+    return { score, frameScores, rolls };
+}
 
-        let html = '<div class="score-sheet"><h2>Representative Game</h2><table><tr><th>Frame</th><th>Roll 1</th><th>Roll 2</th><th>Score</th></tr>';
-        for (let i = 0; i < 10; i++) {
-            let roll1 = i * 2 < rolls.length ? rolls[i * 2] : '-';
-            let roll2 = i * 2 + 1 < rolls.length ? rolls[i * 2 + 1] : '-';
-            let score = frames[i] || 0;
+function generateRepresentativeGame(strikePercentage, sparePercentage) {
+    const numGames = 10;
+    let games = [];
+    let closestGame = null;
+    let closestDiff = Infinity;
 
-            html += `<tr${roll1 == 10 ? ' class="strike"' : roll1 + roll2 == 10 ? ' class="spare"' : ''}>
-                        <td>${i + 1}</td>
-                        <td>${roll1}</td>
-                        <td>${roll2}</td>
-                        <td>${score}</td>
-                    </tr>`;
+    for (let i = 0; i < numGames; i++) {
+        let game = simulateBowlingGame(strikePercentage, sparePercentage);
+        games.push(game);
+
+        let strikes = game.rolls.filter(roll => roll === 10).length;
+        let spares = game.rolls.reduce((count, roll, index, array) => {
+            if (index % 2 === 1 && roll + array[index-1] === 10 && array[index-1] !== 10) {
+                return count + 1;
+            }
+            return count;
+        }, 0);
+
+        let actualStrikePercentage = (strikes / 21) * 100; // 21 possible strike opportunities
+        let actualSparePercentage = (spares / (21 - strikes)) * 100; // Adjust spare opportunities based on strikes
+
+        let diff = Math.abs(actualStrikePercentage - strikePercentage) + 
+                   Math.abs(actualSparePercentage - sparePercentage);
+
+        if (diff < closestDiff) {
+            closestDiff = diff;
+            closestGame = game;
         }
-        html += '</table><p><strong>Final Score:</strong> ' + representativeGame.score + '</p></div>';
-
-        return html;
     }
 
-    document.getElementById('simulate-button').addEventListener('click', () => {
-        const strikePercentage = parseFloat(document.getElementById('strike-percentage').value) || 0;
-        const sparePercentage = parseFloat(document.getElementById('spare-percentage').value) || 0;
-        const numSimulations = parseInt(document.getElementById('simulations').value) || 100;
+    let frameScores = closestGame.frameScores;
+    let rolls = closestGame.rolls;
 
-        const progressBarInner = document.getElementById('progress-bar-inner');
-        progressBarInner.style.width = '0%';
+    let html = '<div class="score-sheet">';
+    html += '<h2>Representative Game</h2>';
+    html += '<div class="frames-container">';
+    let rollIndex = 0;
+    let cumulativeScore = 0;
 
-        let completedSimulations = 0;
-        let totalScore = 0;
-        let simulationInterval = setInterval(() => {
-            if (completedSimulations < numSimulations) {
-                const result = simulateBowlingGame(strikePercentage, sparePercentage);
-                totalScore += result.score;
-                completedSimulations++;
-                progressBarInner.style.width = `${(completedSimulations / numSimulations) * 100}%`;
-                progressBarInner.textContent = `${Math.round((completedSimulations / numSimulations) * 100)}%`;
+    for (let i = 0; i < 10; i++) {
+        let firstRoll = rolls[rollIndex];
+        let secondRoll = rolls[rollIndex + 1] || 0;
+        let thirdRoll = (i === 9) ? (rolls[rollIndex + 2] || 0) : 0;
+        
+        cumulativeScore += frameScores[i];
+
+        let roll1Display = firstRoll === 10 ? 'X' : firstRoll;
+        let roll2Display = '';
+        let roll3Display = '';
+
+        if (i < 9) {
+            if (firstRoll < 10) {
+                roll2Display = (firstRoll + secondRoll === 10) ? '/' : secondRoll;
+            }
+        } else { // 10th frame
+            if (firstRoll === 10) {
+                roll2Display = secondRoll === 10 ? 'X' : secondRoll;
+                roll3Display = thirdRoll === 10 ? 'X' : thirdRoll;
+            } else if (firstRoll + secondRoll === 10) {
+                roll2Display = '/';
+                roll3Display = thirdRoll === 10 ? 'X' : thirdRoll;
             } else {
-                clearInterval(simulationInterval);
-                const averageScore = totalScore / numSimulations;
-                document.getElementById('result').innerHTML = `
-                    <p>Simulation completed! Average score is ${averageScore.toFixed(2)}.</p>
-                    ${generateRepresentativeGame(averageScore)}
-                `;
+                roll2Display = secondRoll;
             }
-        }, 50);
-    });
+        }
 
-    // Handle CFG slider changes
-    document.getElementById('cfg-slider').addEventListener('input', (event) => {
-        document.getElementById('cfg-value').textContent = event.target.value;
-    });
+        html += `<div class="frame ${i === 9 ? 'tenth-frame' : ''}">
+                    <div class="frame-top">
+                        <span class="roll1">${roll1Display}</span>
+                        <span class="roll2">${roll2Display}</span>
+                        ${i === 9 ? `<span class="roll3">${roll3Display}</span>` : ''}
+                    </div>
+                    <div class="frame-bottom">${cumulativeScore}</div>
+                </div>`;
 
-    // Handle dice button clicks
-    document.getElementById('dice-button').addEventListener('click', () => {
-        const randomSeed = Math.floor(Math.random() * 1000000);
-        alert(`Random seed generated: ${randomSeed}`);
-    });
+        rollIndex += (i < 9 && firstRoll === 10) ? 1 : (i === 9) ? 3 : 2;
+    }
 
-    // Handle download button clicks
-    document.getElementById('download-button').addEventListener('click', () => {
-        // This functionality depends on how you generate the image. 
-        // Placeholder function:
-        alert('Download functionality is not yet implemented.');
-    });
+    html += '</div></div>';
+    return html;
+}
+
+document.getElementById('simulate-button').addEventListener('click', () => {
+    const strikePercentage = parseFloat(document.getElementById('strike-percentage').value) || 0;
+    const sparePercentage = parseFloat(document.getElementById('spare-percentage').value) || 0;
+    const numSimulations = parseInt(document.getElementById('simulations').value) || 100;
+
+    const progressBarInner = document.getElementById('progress-bar-inner');
+    progressBarInner.style.width = '0%';
+
+    let completedSimulations = 0;
+    let totalScore = 0;
+    let simulationInterval = setInterval(() => {
+        if (completedSimulations < numSimulations) {
+            const result = simulateBowlingGame(strikePercentage, sparePercentage);
+            totalScore += result.score;
+            completedSimulations++;
+            progressBarInner.style.width = `${(completedSimulations / numSimulations) * 100}%`;
+            progressBarInner.textContent = `${Math.round((completedSimulations / numSimulations) * 100)}%`;
+        } else {
+            clearInterval(simulationInterval);
+            const averageScore = totalScore / numSimulations;
+            document.getElementById('result').innerHTML = `
+                <p>Simulation completed! Average score is ${averageScore.toFixed(2)}.</p>
+                ${generateRepresentativeGame(strikePercentage, sparePercentage)}
+            `;
+        }
+    }, 50);
+});
 </script>
 
 </body>
