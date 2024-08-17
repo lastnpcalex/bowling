@@ -5,12 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bowling Game Analysis</title>
     <link rel="stylesheet" href="styles.css">
-        <style>
-        body {
-            background: url('bg.png') center center fixed;
-            background-size: auto;
-        }
-    </style>
 </head>
 <body>
     <div class="container">
@@ -22,6 +16,7 @@
             <li>Click the <strong>Upload</strong> button below to select one or more JSON files exported from your bowling simulator.</li>
             <li>Once your files are selected, click <strong>Analyze</strong> to start the analysis process.</li>
             <li>View the results, including your average score, strike percentage, and spare percentage, after the analysis completes.</li>
+            <li>Click <strong>Generate Representative Game</strong> to see a scorecard based on your statistics.</li>
         </ol>
         
         <!-- File Input and Analyze Button -->
@@ -39,8 +34,13 @@
             <p id="strike-percentage"></p>
             <p id="spare-percentage"></p>
         </div>
-    </div>
 
+        <!-- Generate Representative Game Button -->
+        <button id="generate-game" onclick="generateRepresentativeGame()" style="display: none;">Generate Representative Game</button>
+
+        <!-- Representative Game Scorecard -->
+        <div id="scorecard"></div>
+    </div>
     <script src="analysis.js"></script>
 </body>
 </html>
