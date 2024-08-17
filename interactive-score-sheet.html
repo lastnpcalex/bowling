@@ -231,8 +231,8 @@ function selectFrame(frameIndex) {
     const frame = gameScores[currentFrame];
 
     if (frameIndex === 9) {
-        // For 10th frame, set currentRoll based on the number of rolls entered
-        currentRoll = Math.min(frame.rolls.length, 2);
+        // For the 10th frame, start at the first roll by default
+        currentRoll = 0;
         gameComplete = false; // Reset game complete status when selecting 10th frame
     } else {
         currentRoll = 0;
@@ -244,6 +244,7 @@ function selectFrame(frameIndex) {
     document.querySelectorAll(".frame").forEach((f) => f.classList.remove("selected"));
     framesContainer.children[frameIndex].classList.add("selected");
 }
+
 
 function updateInputOptions() {
     inputButtons.innerHTML = ""; // Clear existing buttons
