@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bowling Game Analysis</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Bowling Game Analysis</h1>
+        
+        <!-- Instructions Section -->
+        <p>Welcome to the Bowling Game Analysis tool. Follow these steps to analyze your game data:</p>
+        <ol>
+            <li>Click the <strong>Upload</strong> button below to select one or more JSON files exported from your bowling simulator.</li>
+            <li>Once your files are selected, click <strong>Analyze</strong> to start the analysis process.</li>
+            <li>View the results, including your average score, strike percentage, and spare percentage, after the analysis completes.</li>
+        </ol>
+        
+        <!-- File Input and Analyze Button -->
+        <input type="file" id="jsonFiles" multiple>
+        <button onclick="analyzeFiles()">Analyze</button>
+        
+        <!-- Progress Bar -->
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        
+        <!-- Results Display -->
+        <div id="results">
+            <p id="average-score"></p>
+            <p id="strike-percentage"></p>
+            <p id="spare-percentage"></p>
+        </div>
+    </div>
+
+    <script src="analysis.js"></script>
+</body>
+</html>
