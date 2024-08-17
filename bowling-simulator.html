@@ -3,216 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bowling Simulator</title>
+    <title>Bowling Game Analysis</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <div class="container">
+        <h1>Bowling Game Analysis</h1>
+        
+        <!-- Instructions Section -->
+        <p>Welcome to the Bowling Game Analysis tool. Follow these steps to analyze your game data:</p>
+        <ol>
+            <li>Click the <strong>Upload</strong> button below to select one or more JSON files exported from your bowling simulator.</li>
+            <li>Once your files are selected, click <strong>Analyze</strong> to start the analysis process.</li>
+            <li>View the results, including your average score, strike percentage, and spare percentage, after the analysis completes.</li>
+            <li>Click <strong>Generate Representative Game</strong> to see a scorecard based on your statistics.</li>
+        </ol>
+        
+        <!-- File Input and Analyze Button -->
+        <input type="file" id="jsonFiles" multiple>
+        <button onclick="analyzeFiles()">Analyze</button>
+        
+        <!-- Progress Bar -->
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        
+        <!-- Results Display -->
+        <div id="results">
+            <p id="average-score"></p>
+            <p id="strike-percentage"></p>
+            <p id="spare-percentage"></p>
+        </div>
 
-<div class="container">
-    <h1>Bowling Simulator</h1>
+        <!-- Generate Representative Game Button -->
+        <button id="generate-game" onclick="generateRepresentativeGame()" style="display: none;">Generate Representative Game</button>
 
-    <label for="strike-percentage">Strike Percentage <span class="tooltip">ℹ
-        <span class="tooltiptext">Amateurs: 10-15%, Pros: 60-70%</span>
-    </span>:</label>
-    <input type="number" id="strike-percentage" placeholder="Enter your strike percentage" value="11">
-
-    <label for="spare-percentage">Spare Percentage <span class="tooltip">ℹ
-        <span class="tooltiptext">Amateurs: 30-40%, Pros: 80-90%</span>
-    </span>:</label>
-    <input type="number" id="spare-percentage" placeholder="Enter your spare percentage" value="35">
-
-    <label for="simulations">Number of Simulations (30-1000):</label>
-    <input type="number" id="simulations" placeholder="Enter number of games to simulate" value="100">
-
-    <button id="simulate-button">Simulate Games</button>
-
-    <div class="progress-bar" id="progress-bar">
-        <div class="progress-bar-inner" id="progress-bar-inner"></div>
+        <!-- Representative Game Scorecard -->
+        <div id="scorecard"></div>
     </div>
-
-    <div class="result" id="result"></div>
-</div>
-
-<script>
-function simulateBowlingGame(strikePercentage, sparePercentage) {
-    const frames = 10;
-    let score = 0;
-    let frameScores = [];
-    let rolls = [];
-
-    function generateRoll(pinsLeft = 10) {
-        const random = Math.random() * 100;
-        if (pinsLeft === 10 && random < strikePercentage) {
-            return 10;
-        } else {
-            // Adjust probability distribution for non-strike rolls
-            const maxRoll = Math.min(pinsLeft, 9); // Cap at 9 for realism
-            return Math.floor(Math.random() * (maxRoll + 1));
-        }
-    }
-
-    function isSpare(roll1, roll2) {
-        return roll1 + roll2 === 10 && roll1 !== 10;
-    }
-
-    for (let frame = 0; frame < frames; frame++) {
-        let firstRoll = generateRoll();
-        rolls.push(firstRoll);
-        
-        if (firstRoll < 10 || frame === 9) {
-            let secondRoll = generateRoll(10 - firstRoll);
-            if (frame < 9 && firstRoll + secondRoll === 10) {
-                // Adjust for spare percentage
-                if (Math.random() * 100 >= sparePercentage) {
-                    secondRoll = Math.min(secondRoll, 9 - firstRoll); // Ensure it's not a spare
-                }
-            }
-            rolls.push(secondRoll);
-            
-            if (frame === 9 && (firstRoll === 10 || isSpare(firstRoll, secondRoll))) {
-                let thirdRoll = generateRoll();
-                rolls.push(thirdRoll);
-            }
-        }
-    }
-
-    let rollIndex = 0;
-    for (let frame = 0; frame < frames; frame++) {
-        let frameScore = 0;
-        
-        if (frame < 9) {
-            if (rolls[rollIndex] === 10) { // Strike
-                frameScore = 10 + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
-                rollIndex += 1;
-            } else if (isSpare(rolls[rollIndex], rolls[rollIndex + 1])) { // Spare
-                frameScore = 10 + (rolls[rollIndex + 2] || 0);
-                rollIndex += 2;
-            } else { // Open frame
-                frameScore = rolls[rollIndex] + rolls[rollIndex + 1];
-                rollIndex += 2;
-            }
-        } else { // 10th frame
-            frameScore = rolls[rollIndex] + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
-            rollIndex += 3;
-        }
-        
-        score += frameScore;
-        frameScores.push(frameScore);
-    }
-
-    return { score, frameScores, rolls };
-}
-
-function generateRepresentativeGame(strikePercentage, sparePercentage) {
-    const numGames = 10;
-    let games = [];
-    let closestGame = null;
-    let closestDiff = Infinity;
-
-    for (let i = 0; i < numGames; i++) {
-        let game = simulateBowlingGame(strikePercentage, sparePercentage);
-        games.push(game);
-
-        let strikes = game.rolls.filter(roll => roll === 10).length;
-        let spares = game.rolls.reduce((count, roll, index, array) => {
-            if (index % 2 === 1 && roll + array[index-1] === 10 && array[index-1] !== 10) {
-                return count + 1;
-            }
-            return count;
-        }, 0);
-
-        let actualStrikePercentage = (strikes / 21) * 100; // 21 possible strike opportunities
-        let actualSparePercentage = (spares / (21 - strikes)) * 100; // Adjust spare opportunities based on strikes
-
-        let diff = Math.abs(actualStrikePercentage - strikePercentage) + 
-                   Math.abs(actualSparePercentage - sparePercentage);
-
-        if (diff < closestDiff) {
-            closestDiff = diff;
-            closestGame = game;
-        }
-    }
-
-    let frameScores = closestGame.frameScores;
-    let rolls = closestGame.rolls;
-
-    let html = '<div class="score-sheet">';
-    html += '<h2>Representative Game</h2>';
-    html += '<div class="frames-container">';
-    let rollIndex = 0;
-    let cumulativeScore = 0;
-
-    for (let i = 0; i < 10; i++) {
-        let firstRoll = rolls[rollIndex];
-        let secondRoll = rolls[rollIndex + 1] || 0;
-        let thirdRoll = (i === 9) ? (rolls[rollIndex + 2] || 0) : 0;
-        
-        cumulativeScore += frameScores[i];
-
-        let roll1Display = firstRoll === 10 ? 'X' : firstRoll;
-        let roll2Display = '';
-        let roll3Display = '';
-
-        if (i < 9) {
-            if (firstRoll < 10) {
-                roll2Display = (firstRoll + secondRoll === 10) ? '/' : secondRoll;
-            }
-        } else { // 10th frame
-            if (firstRoll === 10) {
-                roll2Display = secondRoll === 10 ? 'X' : secondRoll;
-                roll3Display = thirdRoll === 10 ? 'X' : thirdRoll;
-            } else if (firstRoll + secondRoll === 10) {
-                roll2Display = '/';
-                roll3Display = thirdRoll === 10 ? 'X' : thirdRoll;
-            } else {
-                roll2Display = secondRoll;
-            }
-        }
-
-        html += `<div class="frame ${i === 9 ? 'tenth-frame' : ''}">
-                    <div class="frame-top">
-                        <span class="roll1">${roll1Display}</span>
-                        <span class="roll2">${roll2Display}</span>
-                        ${i === 9 ? `<span class="roll3">${roll3Display}</span>` : ''}
-                    </div>
-                    <div class="frame-bottom">${cumulativeScore}</div>
-                </div>`;
-
-        rollIndex += (i < 9 && firstRoll === 10) ? 1 : (i === 9) ? 3 : 2;
-    }
-
-    html += '</div></div>';
-    return html;
-}
-
-document.getElementById('simulate-button').addEventListener('click', () => {
-    const strikePercentage = parseFloat(document.getElementById('strike-percentage').value) || 0;
-    const sparePercentage = parseFloat(document.getElementById('spare-percentage').value) || 0;
-    const numSimulations = parseInt(document.getElementById('simulations').value) || 100;
-
-    const progressBarInner = document.getElementById('progress-bar-inner');
-    progressBarInner.style.width = '0%';
-
-    let completedSimulations = 0;
-    let totalScore = 0;
-    let simulationInterval = setInterval(() => {
-        if (completedSimulations < numSimulations) {
-            const result = simulateBowlingGame(strikePercentage, sparePercentage);
-            totalScore += result.score;
-            completedSimulations++;
-            progressBarInner.style.width = `${(completedSimulations / numSimulations) * 100}%`;
-            progressBarInner.textContent = `${Math.round((completedSimulations / numSimulations) * 100)}%`;
-        } else {
-            clearInterval(simulationInterval);
-            const averageScore = totalScore / numSimulations;
-            document.getElementById('result').innerHTML = `
-                <p>Simulation completed! Average score is ${averageScore.toFixed(2)}.</p>
-                ${generateRepresentativeGame(strikePercentage, sparePercentage)}
-            `;
-        }
-    }, 50);
-});
-</script>
-
+    <script src="analysis.js"></script>
 </body>
 </html>
