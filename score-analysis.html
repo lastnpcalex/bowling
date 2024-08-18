@@ -6,7 +6,7 @@
     <title>Bowling Game Analysis</title>
     <link rel="stylesheet" href="styles.css">
     <style>
- .title-container {
+        .title-container {
             display: flex;
             align-items: center;
             justify-content: center;
@@ -17,47 +17,91 @@
             height: 50px;
             margin: 0 10px;
         }
-</style>
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 49%;
+        }
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+        .cyberpunk-button {
+            display: inline-block;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #file-count {
+            text-align: center;
+            margin-top: 10px;
+            color: #00ff99;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-	<div class="title-container">
-        <img src="11-50-09-660_512.webp" alt="Bowling GIF">
-        <h1>Bowling Analysis</h1>
-        <img src="11-50-09-660_512.webp" alt="Bowling GIF">
-    </div>
+        <div class="title-container">
+            <img src="11-50-09-660_512.webp" alt="Bowling GIF">
+            <h1>Bowling Analysis</h1>
+            <img src="11-50-09-660_512.webp" alt="Bowling GIF">
+        </div>
         
         <!-- Instructions Section -->
         <p>Welcome to the Bowling Game Analysis tool. Follow these steps to analyze your game data:</p>
         <ol>
-            <li>Click the <strong>Upload</strong> button below to select one or more JSON files exported from your bowling simulator.</li>
+            <li>Click the <strong>Choose Files</strong> button below to select one or more JSON files exported from your bowling simulator.</li>
             <li>Once your files are selected, click <strong>Analyze</strong> to start the analysis process.</li>
             <li>View the results, including your average score, strike percentage, and spare percentage, after the analysis completes.</li>
             <li>Click <strong>Generate Representative Game</strong> to see a scorecard based on your statistics.</li>
         </ol>
         
         <!-- File Input and Analyze Button -->
-        <input type="file" id="jsonFiles" multiple>
-<button onclick="analyzeFiles()" class="cyberpunk-button">Analyze</button>
+        <div class="button-container">
+            <div class="file-input-wrapper">
+                <button class="cyberpunk-button">Choose Files</button>
+                <input type="file" id="jsonFiles" multiple onchange="updateFileCount()">
+            </div>
+            <button onclick="analyzeFiles()" class="cyberpunk-button" style="width: 49%;">Analyze</button>
+        </div>
+        <div id="file-count"></div>
 
-<!-- Progress Bar -->
-<div id="progress-container">
-    <div id="progress-bar"></div>
-</div>
+        <!-- Progress Bar -->
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
 
-<!-- Results Display -->
-<div id="results">
-    <p id="average-score"></p>
-    <p id="strike-percentage"></p>
-    <p id="spare-percentage"></p>
-</div>
+        <!-- Results Display -->
+        <div id="results">
+            <p id="average-score"></p>
+            <p id="strike-percentage"></p>
+            <p id="spare-percentage"></p>
+        </div>
 
-<!-- Generate Representative Game Button -->
-<button id="generate-game" onclick="generateRepresentativeGame()" class="cyberpunk-button" style="display: none;">Generate Representative Game</button>
+        <!-- Generate Representative Game Button -->
+        <button id="generate-game" onclick="generateRepresentativeGame()" class="cyberpunk-button" style="display: none;">Generate Representative Game</button>
 
-<!-- Representative Game Scorecard -->
-<div id="scorecard"></div>
+        <!-- Representative Game Scorecard -->
+        <div id="scorecard"></div>
     </div>
     <script src="analysis.js"></script>
+    <script>
+        function updateFileCount() {
+            const fileInput = document.getElementById('jsonFiles');
+            const fileCount = document.getElementById('file-count');
+            const count = fileInput.files.length;
+            fileCount.textContent = count > 0 ? `${count} file${count > 1 ? 's' : ''} selected` : '';
+        }
+    </script>
 </body>
 </html>
