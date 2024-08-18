@@ -47,6 +47,10 @@
             width: 100%;
             margin-top: 20px;
         }
+        #regenerate-game {
+            display: none;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -84,11 +88,11 @@
 
     <div class="result" id="result"></div>
 
-    <button id="regenerate-game" class="cyberpunk-button" style="display: none;">Regenerate Representative Game</button>
+    <button id="regenerate-game" class="cyberpunk-button">Regenerate a Game</button>
 </div>
 
 <script>
-    function simulateBowlingGame(strikePercentage, sparePercentage) {
+function simulateBowlingGame(strikePercentage, sparePercentage) {
     const frames = 10;
     let score = 0;
     let frameScores = [];
@@ -263,8 +267,23 @@ document.getElementById('simulate-button').addEventListener('click', () => {
                 <p>Simulation completed! Average score is ${averageScore.toFixed(2)}.</p>
                 ${generateRepresentativeGame(strikePercentage, sparePercentage)}
             `;
+            document.getElementById('regenerate-game').style.display = 'block';
         }
     }, 50);
+});
+
+document.getElementById('regenerate-game').addEventListener('click', () => {
+    const strikePercentage = parseFloat(document.getElementById('strike-percentage').value) || 0;
+    const sparePercentage = parseFloat(document.getElementById('spare-percentage').value) || 0;
+    
+    const resultElement = document.getElementById('result');
+    // Keep the average score paragraph and remove the old game
+    const averageScoreParagraph = resultElement.querySelector('p');
+    resultElement.innerHTML = '';
+    resultElement.appendChild(averageScoreParagraph);
+
+    const newGame = generateRepresentativeGame(strikePercentage, sparePercentage);
+    resultElement.innerHTML += newGame;
 });
 </script>
 
