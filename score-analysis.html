@@ -38,25 +38,25 @@
         
         <!-- File Input and Analyze Button -->
         <input type="file" id="jsonFiles" multiple>
-        <button onclick="analyzeFiles()">Analyze</button>
-        
-        <!-- Progress Bar -->
-        <div id="progress-container">
-            <div id="progress-bar"></div>
-        </div>
-        
-        <!-- Results Display -->
-        <div id="results">
-            <p id="average-score"></p>
-            <p id="strike-percentage"></p>
-            <p id="spare-percentage"></p>
-        </div>
+<button onclick="analyzeFiles()" class="cyberpunk-button">Analyze</button>
 
-        <!-- Generate Representative Game Button -->
-        <button id="generate-game" onclick="generateRepresentativeGame()" style="display: none;">Generate Representative Game</button>
+<!-- Progress Bar -->
+<div id="progress-container">
+    <div id="progress-bar"></div>
+</div>
 
-        <!-- Representative Game Scorecard -->
-        <div id="scorecard"></div>
+<!-- Results Display -->
+<div id="results">
+    <p id="average-score"></p>
+    <p id="strike-percentage"></p>
+    <p id="spare-percentage"></p>
+</div>
+
+<!-- Generate Representative Game Button -->
+<button id="generate-game" onclick="generateRepresentativeGame()" class="cyberpunk-button" style="display: none;">Generate Representative Game</button>
+
+<!-- Representative Game Scorecard -->
+<div id="scorecard"></div>
     </div>
     <script src="analysis.js"></script>
 </body>
