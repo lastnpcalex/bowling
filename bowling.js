@@ -118,7 +118,7 @@ function updateInputOptions() {
     (currentRoll === 1 && rolls[0] !== 10) || // 2nd roll, and 1st roll wasn't a strike
     (currentRoll === 2 && (rolls[0] === 10 && rolls[1] !== 10) // 3rd roll, 1st or 2nd was strike/spare, but 2nd wasn't a strike
   ))
-)
+))
 {
     if (maxPins > 0) {
       const spareButton = document.createElement("button");
