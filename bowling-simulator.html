@@ -310,10 +310,18 @@ document.getElementById('regenerate-game').addEventListener('click', () => {
     // Generate a new representative game
     const newGame = generateRepresentativeGame(strikePercentage, sparePercentage);
     
-    // Update the result element with the preserved stats and new game
+    // Clear the result element
     resultElement.innerHTML = '';
-    resultElement.appendChild(statsContainer);
-    resultElement.innerHTML += newGame;
+    
+    // Append the preserved stats container if it exists
+    if (statsContainer) {
+        resultElement.appendChild(statsContainer);
+    }
+    
+    // Create a new div for the game and append it
+    const gameDiv = document.createElement('div');
+    gameDiv.innerHTML = newGame;
+    resultElement.appendChild(gameDiv);
 });
 </script>
 
