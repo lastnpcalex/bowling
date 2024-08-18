@@ -17,38 +17,42 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
         }
-
         .neon-box {
-            padding: 30px;
+            width: 90%;
+            max-width: 390px;
+            padding: 20px;
             border: 2px solid #00ff99;
             border-radius: 10px;
             background: rgba(0, 0, 0, 0.7);
             box-shadow: 0 0 20px #00ccff, 0 0 30px #00ff99;
             text-align: center;
+            box-sizing: border-box;
         }
-
         .title-container {
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 20px;
         }
-
+        .title-text {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
         h1 {
-            font-size: 2.5rem;
+            font-size: 1.5rem;
             color: #00ccff;
             text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff;
-            margin: 0 10px;
+            margin: 0;
+            line-height: 1.2;
         }
-
         .title-container img {
-            width: 50px;
-            height: 50px;
+            height: 60px;
+            width: auto;
             margin: 0 10px;
         }
-
         a {
             display: block;
             text-decoration: none;
@@ -59,29 +63,30 @@
             border-radius: 5px;
             margin: 10px 0;
             transition: all 0.3s ease;
+            white-space: normal;
+            word-wrap: break-word;
         }
-
         a:hover {
             background-color: #00ff99;
             color: #0d0d0d;
             border-color: #00ccff;
             text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff;
         }
-
     </style>
 </head>
 <body>
-
 <div class="neon-box">
     <div class="title-container">
         <img src="11-50-09-660_512.webp" alt="Bowling GIF">
-        <h1>LastNPCAlex's Bowling Hub</h1>
+        <div class="title-text">
+            <h1>LastNPCAlex's</h1>
+            <h1>Bowling Hub</h1>
+        </div>
         <img src="11-50-09-660_512.webp" alt="Bowling GIF">
     </div>
-    <a href="bowling-simulator.html">Bowling Simulator</a>
-    <a href="interactive-score-sheet.html">Interactive Score Sheet</a>
-    <a href="score-analysis.html">Score Analysis</a>
+    <a href="bowling-simulator.html">Bowling<br>Simulator</a>
+    <a href="interactive-score-sheet.html">Interactive<br>Score Sheet</a>
+    <a href="score-analysis.html">Score<br>Analysis</a>
 </div>
-
 </body>
 </html>
