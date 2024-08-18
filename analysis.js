@@ -8,6 +8,7 @@ function analyzeFiles() {
     let totalStrikes = 0;
     let totalSpares = 0;
     let totalFrames = 0;
+    let totalRolls = 0;
     let processedFiles = 0;
     let allScores = []; // Array to store all individual frame scores
     const progressBar = document.getElementById('progress-bar');
@@ -19,6 +20,7 @@ function analyzeFiles() {
                 totalScore += frame.score;
                 allScores.push(frame.score); // Add each frame score to the array
                 totalFrames++;
+                totalRolls += frame.rolls.length;
                 // Count strikes and spares
                 if (frame.rolls.length === 1 && frame.rolls[0] === 10) {
                     totalStrikes++;
@@ -29,17 +31,17 @@ function analyzeFiles() {
             processedFiles++;
             progressBar.style.width = `${(processedFiles / files.length) * 100}%`;
             if (processedFiles === files.length) {
-                displayResults(totalScore, totalStrikes, totalSpares, totalFrames, allScores);
+                displayResults(totalScore, totalStrikes, totalSpares, totalFrames, totalRolls, allScores);
             }
         };
         reader.readAsText(file);
     });
 }
 
-function displayResults(totalScore, totalStrikes, totalSpares, totalFrames, allScores) {
+function displayResults(totalScore, totalStrikes, totalSpares, totalFrames, totalRolls, allScores) {
     const averageScore = totalScore / totalFrames;
-    globalStrikePercentage = (totalStrikes / totalFrames) * 100;
-    globalSparePercentage = (totalSpares / (totalFrames - totalStrikes)) * 100;
+    globalStrikePercentage = (totalStrikes / totalRolls) * 100;
+    globalSparePercentage = (totalSpares / (totalRolls - totalStrikes)) * 100;
     const maxScore = Math.max(...allScores);
     const minScore = Math.min(...allScores);
     const stdDev = calculateStandardDeviation(allScores);
@@ -76,7 +78,8 @@ function simulateBowlingGame(strikePercentage, sparePercentage) {
         if (pinsLeft === 10 && random < strikePercentage) {
             return 10;
         } else {
-            const maxRoll = Math.min(pinsLeft, 9);
+            // Adjust roll distribution to be more realistic
+            const maxRoll = Math.min(pinsLeft, 7);  // Cap regular rolls at 7 for more realism
             return Math.floor(Math.random() * (maxRoll + 1));
         }
     }
@@ -89,40 +92,42 @@ function simulateBowlingGame(strikePercentage, sparePercentage) {
         let firstRoll = generateRoll();
         rolls.push(firstRoll);
         
-        if (firstRoll < 10 || frame === 9) {
-            let secondRoll = generateRoll(10 - firstRoll);
-            if (frame < 9 && firstRoll + secondRoll === 10) {
-                if (Math.random() * 100 >= sparePercentage) {
-                    secondRoll = Math.min(secondRoll, 9 - firstRoll);
-                }
+        if (firstRoll < 10) {
+            let secondRoll;
+            if (Math.random() * 100 < sparePercentage) {
+                secondRoll = 10 - firstRoll; // Force a spare
+            } else {
+                secondRoll = generateRoll(10 - firstRoll);
             }
             rolls.push(secondRoll);
             
+            // For 10th frame, add extra roll for strike or spare
             if (frame === 9 && (firstRoll === 10 || isSpare(firstRoll, secondRoll))) {
-                let thirdRoll = generateRoll();
-                rolls.push(thirdRoll);
+                rolls.push(generateRoll());
             }
+        }
+        
+        // For 10th frame strike, add two more rolls
+        if (frame === 9 && firstRoll === 10) {
+            rolls.push(generateRoll());
+            rolls.push(generateRoll());
         }
     }
 
+    // Calculate frame scores
     let rollIndex = 0;
     for (let frame = 0; frame < frames; frame++) {
         let frameScore = 0;
         
-        if (frame < 9) {
-            if (rolls[rollIndex] === 10) {
-                frameScore = 10 + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
-                rollIndex += 1;
-            } else if (isSpare(rolls[rollIndex], rolls[rollIndex + 1])) {
-                frameScore = 10 + (rolls[rollIndex + 2] || 0);
-                rollIndex += 2;
-            } else {
-                frameScore = rolls[rollIndex] + rolls[rollIndex + 1];
-                rollIndex += 2;
-            }
-        } else {
-            frameScore = rolls[rollIndex] + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
-            rollIndex += 3;
+        if (rolls[rollIndex] === 10) { // Strike
+            frameScore = 10 + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
+            rollIndex += 1;
+        } else if (isSpare(rolls[rollIndex], rolls[rollIndex + 1])) { // Spare
+            frameScore = 10 + (rolls[rollIndex + 2] || 0);
+            rollIndex += 2;
+        } else { // Open frame
+            frameScore = rolls[rollIndex] + (rolls[rollIndex + 1] || 0);
+            rollIndex += 2;
         }
         
         score += frameScore;
@@ -131,6 +136,7 @@ function simulateBowlingGame(strikePercentage, sparePercentage) {
 
     return { score, frameScores, rolls };
 }
+
 
 function displayScorecard(game) {
     let html = '<div class="score-sheet">';
