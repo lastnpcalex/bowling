@@ -7,179 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     
           
-    <style>
-        body {
-            background: url('bg.png') center center fixed;
-            background-size: auto;
-            background-color: #0d0d0d;
-            color: #00ff99;
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 10px;
-            box-shadow: 0 0 20px #00ccff, 0 0 30px #00ff99;
-        }
-        h1, h2 {
-            text-align: center;
-            font-size: 2.5rem;
-            color: #00ccff;
-            text-shadow: 0 0 5px #00ccff, 0 0 10px #00ccff;
-        }
-        h2 {
-            font-size: 2rem;
-            margin-top: 20px;
-        }
-        .instructions {
-            text-align: center;
-            margin-bottom: 20px;
-            color: #00ccff;
-        }
-        .score-sheet {
-            margin-top: 20px;
-            background-color: #0d0d0d;
-            padding: 10px;
-            overflow-x: auto;
-        }
-        .frames-container {
-            display: flex;
-            flex-direction: row;
-            flex-wrap: nowrap;
-            border: 1px solid #00ff99;
-        }
-        .frame {
-            border: 1px solid #00ff99;
-            border-right: 0;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            box-sizing: border-box;
-            width: 60px;
-            height: 60px;
-            margin-right: -1px;
-        }
-        .frame:nth-child(10) {
-            border-right: 1px solid #00ff99;
-            width: 90px;
-        }
-        .frame-top {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 2px;
-            box-sizing: border-box;
-            height: 60%;
-            border-bottom: 1px solid #00ff99;
-        }
-        .frame-bottom {
-            text-align: center;
-            font-size: 18px;
-            padding: 2px;
-            box-sizing: border-box;
-            height: 40%;
-        }
-        .roll1, .roll2, .roll3 {
-            font-size: 18px;
-            color: #00ff99;
-            width: 20px;
-            text-align: center;
-        }
-        .roll2, .roll3 {
-            border-left: 1px solid #00ff99;
-        }
-        .strike {
-            background-color: #ff0000;
-            color: #fff;
-        }
-        .spare {
-            background-color: #00ff00;
-            color: #000;
-        }
-        #input-area {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin-top: 20px;
-        }
-        #roll-info {
-            margin-bottom: 10px;
-            font-size: 1.2em;
-            color: #00ccff;
-        }
-        #input-buttons {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            max-width: 300px;
-        }
-        #input-buttons button {
-            width: 40px;
-            height: 40px;
-            padding: 5px;
-            margin: 3px;
-            font-size: 14px;
-            background-color: #00ff99;
-            color: #0d0d0d;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        #input-buttons button:hover {
-            background-color: #00ccff;
-        }
-        .frame.selected {
-            box-shadow: 0 0 10px #00ff99;
-        }
-        #game-label {
-            margin-top: 20px;
-            text-align: center;
-        }
-        #game-label input {
-            margin-top: 10px;
-            background-color: #1a1a1a;
-            color: #00ff99;
-            border: 2px solid #00ff99;
-            padding: 5px;
-            border-radius: 5px;
-        }
-        #download-button, #file-input-container label {
-            margin-top: 10px;
-            padding: 10px 15px;
-            background-color: #00ff99;
-            color: #0d0d0d;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        #download-button:hover, #file-input-container label:hover {
-            background-color: #00ccff;
-        }
-        #file-input-container {
-            margin-top: 20px;
-            text-align: center;
-        }
-        #file-input-container input[type="file"] {
-            display: none;
-        }
-         .title-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        .title-container img {
-            width: 50px;
-            height: 50px;
-            margin: 0 10px;
-        }
-    </style>
+  
 
 </head>
 <body>
@@ -346,24 +174,28 @@ function handleRoll(pins) {
     const frame = gameScores[currentFrame];
     frame.rolls[currentRoll] = pins;
 
-    updateFrameDisplay(currentFrame);
-
     if (currentFrame === 9) {
         // 10th frame logic
-        if (currentRoll < 2) {
-            currentRoll++;
+        if (currentRoll === 0) {
+            // After 1st roll, always allow 2nd roll
+            currentRoll = 1;
+        } else if (currentRoll === 1) {
+            // After 2nd roll, check if 3rd roll is allowed
+            if (frame.rolls[0] === 10 || frame.rolls[0] + frame.rolls[1] === 10) {
+                currentRoll = 2;
+            } else {
+                // If no 3rd roll, clear it if it exists
+                if (frame.rolls.length > 2) {
+                    frame.rolls.pop();
+                }
+                currentRoll = 0;  // Reset to allow editing
+            }
         } else {
-            gameComplete = true;
-        }
-
-        // Check if 3rd roll is allowed
-        if (currentRoll === 2 && (frame.rolls[0] === 10 || frame.rolls[0] + frame.rolls[1] === 10)) {
-            gameComplete = false;
-        } else if (currentRoll === 2) {
-            gameComplete = true;
+            // After 3rd roll, reset to allow editing
+            currentRoll = 0;
         }
     } else {
-        // Frames 1-9 logic
+        // Frames 1-9 logic (unchanged)
         if (pins === 10 || currentRoll === 1) {
             currentFrame++;
             currentRoll = 0;
@@ -372,12 +204,8 @@ function handleRoll(pins) {
         }
     }
 
-    if (!gameComplete) {
-        updateInputOptions();
-    } else {
-        inputArea.style.display = "none";
-    }
-
+    updateFrameDisplay(currentFrame);
+    updateInputOptions();
     calculateScores();
 }
 
