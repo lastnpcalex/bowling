@@ -304,12 +304,15 @@ document.getElementById('regenerate-game').addEventListener('click', () => {
     const sparePercentage = parseFloat(document.getElementById('spare-percentage').value) || 0;
     
     const resultElement = document.getElementById('result');
-    // Keep the average score paragraph and remove the old game
-    const averageScoreParagraph = resultElement.querySelector('p');
-    resultElement.innerHTML = '';
-    resultElement.appendChild(averageScoreParagraph);
-
+    // Preserve the stats container
+    const statsContainer = resultElement.querySelector('.stats-container');
+    
+    // Generate a new representative game
     const newGame = generateRepresentativeGame(strikePercentage, sparePercentage);
+    
+    // Update the result element with the preserved stats and new game
+    resultElement.innerHTML = '';
+    resultElement.appendChild(statsContainer);
     resultElement.innerHTML += newGame;
 });
 </script>
