@@ -3,233 +3,318 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bowling Simulator</title>
+    <title>Interactive Bowling Scoresheet</title>
     <link rel="stylesheet" href="styles.css">
-    <style>
-                .title-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
+    
+          
+  
 
-                .title-container img {
-            width: 50px;
-            height: 50px;
-            margin: 0 10px;
-        }
-    </style>
 </head>
 <body>
-
-<div class="container">
-    <div class="title-container">
+    <div class="container">
+        <div class="title-container">
         <img src="11-50-09-660_512.webp" alt="Bowling GIF">
-    <h1>Bowling Simulator</h1>
-<img src="11-50-09-660_512.webp" alt="Bowling GIF">
+        <h1>Interactive Bowling Scoresheet</h1>
+        <img src="11-50-09-660_512.webp" alt="Bowling GIF">
+        </div>
+        <div class="instructions">
+            <p>Click a frame to enter a score. To edit a frame, click it and enter a new score.</p>
+        </div>
+        <div id="scoresheet" class="score-sheet">
+            <div class="frames-container">
+                <!-- Frames will be dynamically added here -->
+            </div>
+        </div>
+        <div id="input-area" style="display: none;">
+            <div id="roll-info"></div>
+            <div id="input-buttons"></div>
+        </div>
+        <div id="game-label">
+            <label for="game-name">Game Label:</label>
+            <input type="text" id="game-name" value="">
+            <button id="download-button">Download Game Data</button>
+        </div>
+        <div id="file-input-container">
+            <label for="load-game">Load Game from JSON</label>
+            <input type="file" id="load-game" accept=".json">
+        </div>
     </div>
-    <label for="strike-percentage">Strike Percentage <span class="tooltip">ℹ
-        <span class="tooltiptext">Amateurs: 10-15%, Pros: 60-70%</span>
-    </span>:</label>
-    <input type="number" id="strike-percentage" placeholder="Enter your strike percentage" value="11">
 
-    <label for="spare-percentage">Spare Percentage <span class="tooltip">ℹ
-        <span class="tooltiptext">Amateurs: 30-40%, Pros: 80-90%</span>
-    </span>:</label>
-    <input type="number" id="spare-percentage" placeholder="Enter your spare percentage" value="35">
-
-    <label for="simulations">Number of Simulations (30-1000):</label>
-    <input type="number" id="simulations" placeholder="Enter number of games to simulate" value="100">
-
-    <button id="simulate-button">Simulate Games</button>
-
-    <div class="progress-bar" id="progress-bar">
-        <div class="progress-bar-inner" id="progress-bar-inner"></div>
-    </div>
-
-    <div class="result" id="result"></div>
-</div>
 
 <script>
-function simulateBowlingGame(strikePercentage, sparePercentage) {
-    const frames = 10;
-    let score = 0;
-    let frameScores = [];
-    let rolls = [];
+const scoresheet = document.getElementById('scoresheet');
+const inputArea = document.getElementById('input-area');
+const inputButtons = document.getElementById('input-buttons');
+const rollInfo = document.getElementById('roll-info');
+const framesContainer = scoresheet.querySelector('.frames-container');
+const gameNameInput = document.getElementById('game-name');
+const downloadButton = document.getElementById('download-button');
+let currentFrame = 0;
+let currentRoll = 0;
+let gameScores = Array(10).fill().map(() => ({ rolls: [], score: 0 }));
+let gameComplete = false;
 
-    function generateRoll(pinsLeft = 10) {
-        const random = Math.random() * 100;
-        if (pinsLeft === 10 && random < strikePercentage) {
-            return 10;
-        } else {
-            // Adjust probability distribution for non-strike rolls
-            const maxRoll = Math.min(pinsLeft, 9); // Cap at 9 for realism
-            return Math.floor(Math.random() * (maxRoll + 1));
-        }
+function createFrames() {
+    for (let i = 0; i < 10; i++) {
+        const frame = document.createElement('div');
+        frame.className = `frame ${i === 9 ? 'tenth-frame' : ''}`;
+        frame.innerHTML = `
+            <div class="frame-top">
+                <span class="roll1"></span>
+                <span class="roll2"></span>
+                ${i === 9 ? '<span class="roll3"></span>' : ''}
+            </div>
+            <div class="frame-bottom"></div>
+        `;
+        frame.addEventListener('click', () => selectFrame(i));
+        framesContainer.appendChild(frame);
     }
-
-    function isSpare(roll1, roll2) {
-        return roll1 + roll2 === 10 && roll1 !== 10;
-    }
-
-    for (let frame = 0; frame < frames; frame++) {
-        let firstRoll = generateRoll();
-        rolls.push(firstRoll);
-        
-        if (firstRoll < 10 || frame === 9) {
-            let secondRoll = generateRoll(10 - firstRoll);
-            if (frame < 9 && firstRoll + secondRoll === 10) {
-                // Adjust for spare percentage
-                if (Math.random() * 100 >= sparePercentage) {
-                    secondRoll = Math.min(secondRoll, 9 - firstRoll); // Ensure it's not a spare
-                }
-            }
-            rolls.push(secondRoll);
-            
-            if (frame === 9 && (firstRoll === 10 || isSpare(firstRoll, secondRoll))) {
-                let thirdRoll = generateRoll();
-                rolls.push(thirdRoll);
-            }
-        }
-    }
-
-    let rollIndex = 0;
-    for (let frame = 0; frame < frames; frame++) {
-        let frameScore = 0;
-        
-        if (frame < 9) {
-            if (rolls[rollIndex] === 10) { // Strike
-                frameScore = 10 + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
-                rollIndex += 1;
-            } else if (isSpare(rolls[rollIndex], rolls[rollIndex + 1])) { // Spare
-                frameScore = 10 + (rolls[rollIndex + 2] || 0);
-                rollIndex += 2;
-            } else { // Open frame
-                frameScore = rolls[rollIndex] + rolls[rollIndex + 1];
-                rollIndex += 2;
-            }
-        } else { // 10th frame
-            frameScore = rolls[rollIndex] + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
-            rollIndex += 3;
-        }
-        
-        score += frameScore;
-        frameScores.push(frameScore);
-    }
-
-    return { score, frameScores, rolls };
 }
 
-function generateRepresentativeGame(strikePercentage, sparePercentage) {
-    const numGames = 10;
-    let games = [];
-    let closestGame = null;
-    let closestDiff = Infinity;
+function selectFrame(frameIndex) {
+    currentFrame = frameIndex;
+    const frame = gameScores[currentFrame];
 
-    for (let i = 0; i < numGames; i++) {
-        let game = simulateBowlingGame(strikePercentage, sparePercentage);
-        games.push(game);
+    if (frameIndex === 9) {
+        // For the 10th frame, start at the first roll by default
+        currentRoll = 0;
+        gameComplete = false; // Reset game complete status when selecting 10th frame
+    } else {
+        currentRoll = 0;
+    }
 
-        let strikes = game.rolls.filter(roll => roll === 10).length;
-        let spares = game.rolls.reduce((count, roll, index, array) => {
-            if (index % 2 === 1 && roll + array[index-1] === 10 && array[index-1] !== 10) {
-                return count + 1;
+    updateInputOptions();
+    inputArea.style.display = "flex";
+
+    document.querySelectorAll(".frame").forEach((f) => f.classList.remove("selected"));
+    framesContainer.children[frameIndex].classList.add("selected");
+}
+
+
+function updateInputOptions() {
+    inputButtons.innerHTML = ""; // Clear existing buttons
+    let maxPins = 10;
+    let rollText = "";
+
+    const frame = gameScores[currentFrame];
+    const rolls = frame.rolls;
+
+    if (currentFrame === 9) {
+        // 10th frame logic
+        if (currentRoll === 0) {
+            rollText = "10th Frame - 1st Roll";
+        } else if (currentRoll === 1) {
+            rollText = "10th Frame - 2nd Roll";
+            if (rolls[0] < 10) {
+                maxPins = 10 - rolls[0];
             }
-            return count;
-        }, 0);
-
-        let actualStrikePercentage = (strikes / 21) * 100; // 21 possible strike opportunities
-        let actualSparePercentage = (spares / (21 - strikes)) * 100; // Adjust spare opportunities based on strikes
-
-        let diff = Math.abs(actualStrikePercentage - strikePercentage) + 
-                   Math.abs(actualSparePercentage - sparePercentage);
-
-        if (diff < closestDiff) {
-            closestDiff = diff;
-            closestGame = game;
+        } else if (currentRoll === 2) {
+            rollText = "10th Frame - 3rd Roll";
+            if (rolls[0] === 10) {
+                if (rolls[1] === 10) {
+                    maxPins = 10;
+                } else {
+                    maxPins = 10 - rolls[1];
+                }
+            } else if (rolls[0] + rolls[1] === 10) {
+                maxPins = 10;
+            } else {
+                inputArea.style.display = "none";
+                return;
+            }
+        }
+    } else {
+        // Frames 1-9 logic
+        if (currentRoll === 0) {
+            rollText = `Frame ${currentFrame + 1} - 1st Roll`;
+        } else {
+            rollText = `Frame ${currentFrame + 1} - 2nd Roll`;
+            maxPins = 10 - rolls[0];
         }
     }
 
-    let frameScores = closestGame.frameScores;
-    let rolls = closestGame.rolls;
+    rollInfo.textContent = rollText;
 
-    let html = '<div class="score-sheet">';
-    html += '<h2>Representative Game</h2>';
-    html += '<div class="frames-container">';
-    let rollIndex = 0;
-    let cumulativeScore = 0;
+    for (let i = 0; i <= maxPins; i++) {
+        const button = document.createElement("button");
+        button.textContent = i === 10 ? "X" : i;
+        button.addEventListener("click", () => handleRoll(i));
+        if (rolls[currentRoll] === i) {
+            button.classList.add("selected");
+        }
+        inputButtons.appendChild(button);
+    }
 
+    // Add spare button for 2nd roll in frames 1-9 and 2nd and 3rd rolls in 10th frame when appropriate
+    if ((currentRoll === 1 && currentFrame < 9) || (currentFrame === 9 && (currentRoll === 1 || currentRoll === 2))) {
+        if (maxPins > 0 && maxPins < 10) {
+            const spareButton = document.createElement("button");
+            spareButton.textContent = "/";
+            spareButton.addEventListener("click", () => handleRoll(maxPins));
+            if (rolls[currentRoll] === maxPins) {
+                spareButton.classList.add("selected");
+            }
+            inputButtons.appendChild(spareButton);
+        }
+    }
+
+    // Add "Next Roll" button for 10th frame
+    if (currentFrame === 9 && currentRoll < 2 && rolls.length > currentRoll) {
+        const nextRollButton = document.createElement("button");
+        nextRollButton.textContent = "Next Roll";
+        nextRollButton.addEventListener("click", () => {
+            currentRoll++;
+            updateInputOptions();
+        });
+        inputButtons.appendChild(nextRollButton);
+    }
+}
+
+function handleRoll(pins) {
+    const frame = gameScores[currentFrame];
+    frame.rolls[currentRoll] = pins;
+
+    updateFrameDisplay(currentFrame);
+
+    if (currentFrame === 9) {
+        // 10th frame logic
+        if (currentRoll < 2) {
+            currentRoll++;
+        } else {
+            gameComplete = true;
+        }
+
+        // Check if 3rd roll is allowed
+        if (currentRoll === 2 && (frame.rolls[0] === 10 || frame.rolls[0] + frame.rolls[1] === 10)) {
+            gameComplete = false;
+        } else if (currentRoll === 2) {
+            gameComplete = true;
+        }
+    } else {
+        // Frames 1-9 logic
+        if (pins === 10 || currentRoll === 1) {
+            currentFrame++;
+            currentRoll = 0;
+        } else {
+            currentRoll = 1;
+        }
+    }
+
+    if (!gameComplete) {
+        updateInputOptions();
+    } else {
+        inputArea.style.display = "none";
+    }
+
+    calculateScores();
+}
+
+function updateFrameDisplay(frameIndex) {
+    const frame = framesContainer.children[frameIndex];
+    const rolls = gameScores[frameIndex].rolls;
+    const rollDisplays = frame.querySelectorAll('.roll1, .roll2, .roll3');
+
+    rollDisplays.forEach((display, index) => {
+        if (rolls[index] !== undefined) {
+            if (rolls[index] === 10) {
+                display.textContent = 'X';
+            } else if ((index === 1 && rolls[0] + rolls[1] === 10) ||
+                       (frameIndex === 9 && index === 2 && rolls[1] + rolls[2] === 10 && rolls[1] !== 10)) {
+                display.textContent = '/';
+            } else {
+                display.textContent = rolls[index];
+            }
+        } else {
+            display.textContent = '';
+        }
+    });
+
+    frame.querySelector('.frame-bottom').textContent = gameScores[frameIndex].score || '';
+}
+
+function calculateScores() {
+    let totalScore = 0;
     for (let i = 0; i < 10; i++) {
-        let firstRoll = rolls[rollIndex];
-        let secondRoll = rolls[rollIndex + 1] || 0;
-        let thirdRoll = (i === 9) ? (rolls[rollIndex + 2] || 0) : 0;
-        
-        cumulativeScore += frameScores[i];
-
-        let roll1Display = firstRoll === 10 ? 'X' : firstRoll;
-        let roll2Display = '';
-        let roll3Display = '';
+        const frame = gameScores[i];
+        const rolls = frame.rolls;
 
         if (i < 9) {
-            if (firstRoll < 10) {
-                roll2Display = (firstRoll + secondRoll === 10) ? '/' : secondRoll;
+            if (rolls[0] === 10) { // Strike
+                frame.score = 10 + (gameScores[i+1].rolls[0] || 0) + 
+                              ((gameScores[i+1].rolls[1] !== undefined) ? gameScores[i+1].rolls[1] : 
+                               (gameScores[i+2] && gameScores[i+2].rolls[0]) || 0);
+            } else if (rolls[0] + rolls[1] === 10) { // Spare
+                frame.score = 10 + (gameScores[i+1].rolls[0] || 0);
+            } else { // Open frame
+                frame.score = (rolls[0] || 0) + (rolls[1] || 0);
             }
         } else { // 10th frame
-            if (firstRoll === 10) {
-                roll2Display = secondRoll === 10 ? 'X' : secondRoll;
-                roll3Display = thirdRoll === 10 ? 'X' : thirdRoll;
-            } else if (firstRoll + secondRoll === 10) {
-                roll2Display = '/';
-                roll3Display = thirdRoll === 10 ? 'X' : thirdRoll;
-            } else {
-                roll2Display = secondRoll;
-            }
+            frame.score = (rolls[0] || 0) + (rolls[1] || 0) + (rolls[2] || 0);
         }
 
-        html += `<div class="frame ${i === 9 ? 'tenth-frame' : ''}">
-                    <div class="frame-top">
-                        <span class="roll1">${roll1Display}</span>
-                        <span class="roll2">${roll2Display}</span>
-                        ${i === 9 ? `<span class="roll3">${roll3Display}</span>` : ''}
-                    </div>
-                    <div class="frame-bottom">${cumulativeScore}</div>
-                </div>`;
-
-        rollIndex += (i < 9 && firstRoll === 10) ? 1 : (i === 9) ? 3 : 2;
+        totalScore += frame.score;
+        frame.score = totalScore;
+        updateFrameDisplay(i);
     }
-
-    html += '</div></div>';
-    return html;
 }
 
-document.getElementById('simulate-button').addEventListener('click', () => {
-    const strikePercentage = parseFloat(document.getElementById('strike-percentage').value) || 0;
-    const sparePercentage = parseFloat(document.getElementById('spare-percentage').value) || 0;
-    const numSimulations = parseInt(document.getElementById('simulations').value) || 100;
+function setDefaultGameName() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const defaultName = `Game_${year}-${month}-${day}`;
+    gameNameInput.value = defaultName;
+}
 
-    const progressBarInner = document.getElementById('progress-bar-inner');
-    progressBarInner.style.width = '0%';
+function initializeGame() {
+    createFrames();
+    setDefaultGameName();
+    selectFrame(0);
+}
 
-    let completedSimulations = 0;
-    let totalScore = 0;
-    let simulationInterval = setInterval(() => {
-        if (completedSimulations < numSimulations) {
-            const result = simulateBowlingGame(strikePercentage, sparePercentage);
-            totalScore += result.score;
-            completedSimulations++;
-            progressBarInner.style.width = `${(completedSimulations / numSimulations) * 100}%`;
-            progressBarInner.textContent = `${Math.round((completedSimulations / numSimulations) * 100)}%`;
-        } else {
-            clearInterval(simulationInterval);
-            const averageScore = totalScore / numSimulations;
-            document.getElementById('result').innerHTML = `
-                <p>Simulation completed! Average score is ${averageScore.toFixed(2)}.</p>
-                ${generateRepresentativeGame(strikePercentage, sparePercentage)}
-            `;
-        }
-    }, 50);
+document.addEventListener('DOMContentLoaded', initializeGame);
+
+downloadButton.addEventListener('click', () => {
+    const gameData = JSON.stringify(gameScores);
+    const blob = new Blob([gameData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${gameNameInput.value}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+document.getElementById('load-game').addEventListener('change', (event) => {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const loadedGameScores = JSON.parse(e.target.result);
+                if (Array.isArray(loadedGameScores) && loadedGameScores.length === 10) {
+                    gameScores = loadedGameScores;
+                    gameComplete = gameScores[9].rolls.length === 3 || 
+                                   (gameScores[9].rolls.length === 2 && gameScores[9].rolls[0] + gameScores[9].rolls[1] < 10);
+                    currentFrame = gameComplete ? 9 : gameScores.findIndex(frame => frame.rolls.length < 2);
+                    currentRoll = gameScores[currentFrame].rolls.length;
+                    calculateScores();
+                    for (let i = 0; i < 10; i++) {
+                        updateFrameDisplay(i);
+                    }
+                    selectFrame(currentFrame);
+                } else {
+                    alert('Invalid game data format');
+                }
+            } catch (error) {
+                alert('Error loading game data');
+                console.error(error);
+            }
+        };
+        reader.readAsText(file);
+    }
 });
 </script>
-
 </body>
 </html>
