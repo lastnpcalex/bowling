@@ -105,9 +105,7 @@ function simulateBowlingGame(strikePercentage, sparePercentage) {
         if (pinsLeft === 10 && random < strikePercentage) {
             return 10;
         } else {
-            // Adjust probability distribution for non-strike rolls
-            const maxRoll = Math.min(pinsLeft, 9); // Cap at 9 for realism
-            return Math.floor(Math.random() * (maxRoll + 1));
+            return Math.floor(Math.random() * (pinsLeft + 1));
         }
     }
 
@@ -119,20 +117,25 @@ function simulateBowlingGame(strikePercentage, sparePercentage) {
         let firstRoll = generateRoll();
         rolls.push(firstRoll);
         
-        if (firstRoll < 10 || frame === 9) {
-            let secondRoll = generateRoll(10 - firstRoll);
-            if (frame < 9 && firstRoll + secondRoll === 10) {
-                // Adjust for spare percentage
-                if (Math.random() * 100 >= sparePercentage) {
-                    secondRoll = Math.min(secondRoll, 9 - firstRoll); // Ensure it's not a spare
-                }
+        if (firstRoll < 10) {
+            let secondRoll;
+            if (Math.random() * 100 < sparePercentage) {
+                secondRoll = 10 - firstRoll; // Force a spare
+            } else {
+                secondRoll = generateRoll(10 - firstRoll);
             }
             rolls.push(secondRoll);
             
+            // For 10th frame, add extra rolls for strike or spare
             if (frame === 9 && (firstRoll === 10 || isSpare(firstRoll, secondRoll))) {
-                let thirdRoll = generateRoll();
-                rolls.push(thirdRoll);
+                rolls.push(generateRoll());
             }
+        }
+        
+        // For 10th frame strike, add two more rolls
+        if (frame === 9 && firstRoll === 10) {
+            rolls.push(generateRoll());
+            rolls.push(generateRoll());
         }
     }
 
@@ -140,20 +143,15 @@ function simulateBowlingGame(strikePercentage, sparePercentage) {
     for (let frame = 0; frame < frames; frame++) {
         let frameScore = 0;
         
-        if (frame < 9) {
-            if (rolls[rollIndex] === 10) { // Strike
-                frameScore = 10 + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
-                rollIndex += 1;
-            } else if (isSpare(rolls[rollIndex], rolls[rollIndex + 1])) { // Spare
-                frameScore = 10 + (rolls[rollIndex + 2] || 0);
-                rollIndex += 2;
-            } else { // Open frame
-                frameScore = rolls[rollIndex] + rolls[rollIndex + 1];
-                rollIndex += 2;
-            }
-        } else { // 10th frame
-            frameScore = rolls[rollIndex] + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
-            rollIndex += 3;
+        if (rolls[rollIndex] === 10) { // Strike
+            frameScore = 10 + (rolls[rollIndex + 1] || 0) + (rolls[rollIndex + 2] || 0);
+            rollIndex += 1;
+        } else if (isSpare(rolls[rollIndex], rolls[rollIndex + 1])) { // Spare
+            frameScore = 10 + (rolls[rollIndex + 2] || 0);
+            rollIndex += 2;
+        } else { // Open frame
+            frameScore = rolls[rollIndex] + (rolls[rollIndex + 1] || 0);
+            rollIndex += 2;
         }
         
         score += frameScore;
@@ -217,8 +215,10 @@ function generateRepresentativeGame(strikePercentage, sparePercentage) {
             if (firstRoll < 10) {
                 roll2Display = (firstRoll + secondRoll === 10) ? '/' : secondRoll;
             }
+            rollIndex += (firstRoll === 10) ? 1 : 2;
         } else { // 10th frame
             if (firstRoll === 10) {
+                roll1Display = 'X';
                 roll2Display = secondRoll === 10 ? 'X' : secondRoll;
                 roll3Display = thirdRoll === 10 ? 'X' : thirdRoll;
             } else if (firstRoll + secondRoll === 10) {
@@ -237,13 +237,13 @@ function generateRepresentativeGame(strikePercentage, sparePercentage) {
                     </div>
                     <div class="frame-bottom">${cumulativeScore}</div>
                 </div>`;
-
-        rollIndex += (i < 9 && firstRoll === 10) ? 1 : (i === 9) ? 3 : 2;
     }
 
     html += '</div></div>';
     return html;
 }
+
+// Event listeners remain the same as in the previous version
 
 document.getElementById('simulate-button').addEventListener('click', () => {
     const strikePercentage = parseFloat(document.getElementById('strike-percentage').value) || 0;
