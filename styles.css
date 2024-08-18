@@ -151,22 +151,7 @@ h1 {
     font-size: 0.9rem;
 }
 
-#download-button, #file-input-container label {
-    margin-top: 10px;
-    padding: 8px 12px;
-    background-color: #00ff99;
-    color: #0d0d0d;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 0.9rem;
-    display: inline-block;
-}
 
-#download-button:hover, #file-input-container label:hover {
-    background-color: #00ccff;
-}
 
        .title-container {
             display: flex;
