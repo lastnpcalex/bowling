@@ -131,16 +131,7 @@ function updateInputOptions() {
     }
   }
 
-  // Add "Next Roll" button for 10th frame
-  if (currentFrame === 9 && currentRoll < 2 && rolls.length > currentRoll) {
-    const nextRollButton = document.createElement("button");
-    nextRollButton.textContent = "Next Roll";
-    nextRollButton.addEventListener("click", () => {
-      currentRoll++;
-      updateInputOptions();
-    });
-    inputButtons.appendChild(nextRollButton);
-  }
+
 }
 
 function handleRoll(pins) {
