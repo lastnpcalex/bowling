@@ -28,24 +28,23 @@ function createFrames() {
 }
 
 function selectFrame(frameIndex) {
-    currentFrame = frameIndex;
-    const frame = gameScores[currentFrame];
+  currentFrame = frameIndex;
+  const frame = gameScores[currentFrame];
 
-    if (frameIndex === 9) {
-        // For the 10th frame, start at the first roll by default
-        currentRoll = 0;
-        gameComplete = false; // Reset game complete status when selecting 10th frame
-    } else {
-        currentRoll = 0;
-    }
+  if (frameIndex === 9) {
+    // For the 10th frame, start at the first roll by default
+    currentRoll = 0;
+    gameComplete = false; // Reset game complete status when selecting 10th frame
+  } else {
+    currentRoll = 0;
+  }
 
-    updateInputOptions();
-    inputArea.style.display = "flex";
+  updateInputOptions();
+  inputArea.style.display = "flex";
 
-    document.querySelectorAll(".frame").forEach((f) => f.classList.remove("selected"));
-    framesContainer.children[frameIndex].classList.add("selected");
+  document.querySelectorAll(".frame").forEach((f) => f.classList.remove("selected"));
+  framesContainer.children[frameIndex].classList.add("selected");
 }
-
 
 function updateInputOptions() {
   inputButtons.innerHTML = ""; // Clear existing buttons
@@ -159,11 +158,9 @@ function handleRoll(pins) {
     if (pins === 10 || currentRoll === 1) {
       currentFrame++; 
       currentRoll = 0;
-
-      // Automatically select the next frame if it's not the 10th frame
-      if (currentFrame < 9) {
-        selectFrame(currentFrame); 
-      }
+      
+      // Automatically select the next frame, including the 10th frame
+      selectFrame(currentFrame);
     } else {
       currentRoll = 1;
     }
