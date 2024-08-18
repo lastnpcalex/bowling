@@ -41,13 +41,15 @@
     <label for="simulations">Number of Simulations (30-1000):</label>
     <input type="number" id="simulations" placeholder="Enter number of games to simulate" value="100">
 
-    <button id="simulate-button">Simulate Games</button>
+<button id="simulate-button" class="cyberpunk-button">Simulate Games</button>
 
-    <div class="progress-bar" id="progress-bar">
-        <div class="progress-bar-inner" id="progress-bar-inner"></div>
-    </div>
+<div class="progress-bar" id="progress-bar">
+    <div class="progress-bar-inner" id="progress-bar-inner"></div>
+</div>
 
-    <div class="result" id="result"></div>
+<div class="result" id="result"></div>
+
+<button id="regenerate-game" class="cyberpunk-button" style="display: none;">Regenerate Representative Game</button>
 </div>
 
 <script>
