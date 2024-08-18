@@ -116,7 +116,7 @@ function updateInputOptions() {
   (currentRoll === 1 && currentFrame < 9 && rolls[0] < 10) || // 2nd roll in frames 1-9, and 1st roll wasn't a strike
   (currentFrame === 9 && ( // 10th frame
     (currentRoll === 1 && rolls[0] !== 10) || // 2nd roll, and 1st roll wasn't a strike
-    (currentRoll === 2 && (rolls[0] === 10 || rolls[0] + rolls[1] === 10) && rolls[1] !== 10) // 3rd roll, 1st or 2nd was strike/spare, but 2nd wasn't a strike
+    (currentRoll === 2 && (rolls[0] === 10 && rolls[1] !== 10) // 3rd roll, 1st or 2nd was strike/spare, but 2nd wasn't a strike
   ))
 )
 {
