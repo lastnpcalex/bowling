@@ -6,8 +6,31 @@ body {
     color: #00ff99;
     font-family: 'Courier New', Courier, monospace;
     margin: 0;
-    padding: 10px;
+    padding: 0;
     min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+a.button-link {
+    display: block;
+    text-decoration: none;
+    color: #00ff99;
+    background-color: #1a1a1a;
+    padding: 10px 20px;
+    border: 2px solid #00ff99;
+    border-radius: 5px;
+    margin: 10px 0;
+    transition: all 0.3s ease;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1rem;
+    text-align: center;
+    cursor: pointer;
+    text-transform: none;
+    letter-spacing: normal;
+    box-shadow: 0 0 10px rgba(0, 255, 153, 0.5);
 }
 
 .neon-box-container {
@@ -193,25 +216,22 @@ h1 {
     display: none;
 }
 
-       .title-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        .title-container img {
-            width: 50px;
-            height: 50px;
-            margin: 0 10px;
-        }
+.title-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.title-container img {
+    width: 50px;
+    height: 50px;
+    margin: 0 10px;
+}
 
 #file-input-container {
     margin-top: 15px;
     text-align: center;
-}
-
-#file-input-container input[type="file"] {
-    display: none;
 }
 
 .tooltip {
@@ -261,8 +281,7 @@ h1 {
     transition: width 0.3s ease;
 }
 
-
-#simulate-button {
+#simulate-button, .cyberpunk-button {
     background-color: #0d0d0d;
     color: #00ff99;
     border: 2px solid #00ff99;
@@ -284,13 +303,13 @@ h1 {
     margin-right: auto;
 }
 
-#simulate-button:hover {
+#simulate-button:hover, .cyberpunk-button:hover {
     background-color: #00ff99;
     color: #0d0d0d;
     box-shadow: 0 0 20px #00ff99, 0 0 40px #00ff99;
 }
 
-#simulate-button::before {
+#simulate-button::before, .cyberpunk-button::before {
     content: '';
     position: absolute;
     top: -50%;
@@ -302,104 +321,14 @@ h1 {
     transition: all 0.3s ease;
 }
 
-#simulate-button:hover::before {
+#simulate-button:hover::before, .cyberpunk-button:hover::before {
     left: 100%;
-}
-
-.cyberpunk-button {
-    background-color: #0d0d0d;
-    color: #00ff99;
-    border: 2px solid #00ff99;
-    padding: 12px 24px;
-    font-size: 1.1rem;
-    font-family: 'Courier New', Courier, monospace;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px #00ff99;
-    position: relative;
-    overflow: hidden;
-    margin-top: 20px;
-    display: inline-block;
-    min-width: 200px;
-}
-
-.cyberpunk-button:hover {
-    background-color: #00ff99;
-    color: #0d0d0d;
-    box-shadow: 0 0 20px #00ff99, 0 0 40px #00ff99;
-}
-
-.cyberpunk-button::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: rgba(255, 255, 255, 0.1);
-    transform: rotate(45deg);
-    transition: all 0.3s ease;
-}
-
-.cyberpunk-button:hover::before {
-    left: 100%;
-}
-
-#simulate-button, #generate-game {
-    display: block;
-    width: 100%;
-    max-width: 300px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .button-container {
     display: flex;
     justify-content: space-between;
     margin: 20px 0;
-}
-
-.cyberpunk-button {
-    background-color: #0d0d0d;
-    color: #00ff99;
-    border: 2px solid #00ff99;
-    padding: 12px 24px;
-    font-size: 1.1rem;
-    font-family: 'Courier New', Courier, monospace;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 0 10px #00ff99;
-    position: relative;
-    overflow: hidden;
-    width: 100%;
-    box-sizing: border-box;
-    text-align: center;
-}
-
-.cyberpunk-button:hover {
-    background-color: #00ff99;
-    color: #0d0d0d;
-    box-shadow: 0 0 20px #00ff99, 0 0 40px #00ff99;
-}
-
-.cyberpunk-button::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: rgba(255, 255, 255, 0.1);
-    transform: rotate(45deg);
-    transition: all 0.3s ease;
-}
-
-.cyberpunk-button:hover::before {
-    left: 100%;
 }
 
 .file-input-wrapper {
