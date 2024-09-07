@@ -78,74 +78,73 @@ function initializeGame(containerElement) {
     }
 
     function updateInputOptions() {
-    inputButtons.innerHTML = "";
-    let maxPins = 10;
-    let rollText = "";
+        const inputArea = document.getElementById('input-area');
+        const inputButtons = document.getElementById('input-buttons');
+        const rollInfo = document.getElementById('roll-info');
+        inputButtons.innerHTML = "";
+        let maxPins = 10;
+        let rollText = "";
 
-    const frame = gameScores[currentFrame];
-    const rolls = frame.rolls;
+        const frame = gameScores[currentFrame];
+        const rolls = frame.rolls;
 
-    if (currentFrame === 9) {
-        if (currentRoll === 0) {
-            rollText = "10th Frame - 1st Roll";
-        } else if (currentRoll === 1) {
-            rollText = "10th Frame - 2nd Roll";
-            if (rolls[0] < 10) maxPins = 10 - rolls[0];
-        } else if (currentRoll === 2) {
-            rollText = "10th Frame - 3rd Roll";
-            if (rolls[0] === 10) {
-                if (rolls[1] === 10) {
+        if (currentFrame === 9) {
+            if (currentRoll === 0) {
+                rollText = "10th Frame - 1st Roll";
+            } else if (currentRoll === 1) {
+                rollText = "10th Frame - 2nd Roll";
+                if (rolls[0] < 10) maxPins = 10 - rolls[0];
+            } else if (currentRoll === 2) {
+                rollText = "10th Frame - 3rd Roll";
+                if (rolls[0] === 10) {
+                    if (rolls[1] === 10) {
+                        maxPins = 10;
+                    } else {
+                        maxPins = 10 - rolls[1];
+                    }
+                } else if (rolls[0] + rolls[1] === 10) {
                     maxPins = 10;
                 } else {
-                    maxPins = 10 - rolls[1];
+                    inputArea.style.display = "none";
+                    return;
                 }
-            } else if (rolls[0] + rolls[1] === 10) {
-                maxPins = 10;
-            } else {
-                inputArea.style.display = "none";
-                return;
             }
-        }
-    } else {
-        if (currentRoll === 0) {
-            rollText = `Frame ${currentFrame + 1} - 1st Roll`;
         } else {
-            rollText = `Frame ${currentFrame + 1} - 2nd Roll`;
-            maxPins = 10 - rolls[0];
-        }
-    }
-
-    rollInfo.textContent = rollText;
-
-    for (let i = 0; i <= maxPins; i++) {
-        if ((i === 10 && currentRoll === 1 && rolls[0] === 0) ||
-            (i === 10 && currentFrame === 9 && currentRoll === 2 && rolls[0] === 10 && rolls[1] < 10)) {
-            continue;
-        }
-
-        const button = document.createElement("button");
-        button.textContent = i === 10 ? "X" : i;
-        button.addEventListener("click", () => handleRoll(i));
-        if (rolls[currentRoll] === i) {
-            button.classList.add("selected");
-        }
-        inputButtons.appendChild(button);
-    }
-
-    if ((currentRoll === 1 && currentFrame < 9 && rolls[0] < 10) ||
-        (currentFrame === 9 && ((currentRoll === 1 && rolls[0] !== 10) ||
-        (currentRoll === 2 && rolls[0] === 10 && rolls[1] !== 10)))) {
-        if (maxPins > 0) {
-            const spareButton = document.createElement("button");
-            spareButton.textContent = "/";
-            spareButton.addEventListener("click", () => handleRoll(maxPins));
-            if (rolls[currentRoll] === maxPins) {
-                spareButton.classList.add("selected");
+            if (currentRoll === 0) {
+                rollText = `Frame ${currentFrame + 1} - 1st Roll`;
+            } else {
+                rollText = `Frame ${currentFrame + 1} - 2nd Roll`;
+                maxPins = 10 - rolls[0];
             }
-            inputButtons.appendChild(spareButton);
         }
+
+        rollInfo.textContent = rollText;
+        for (let i = 0; i <= maxPins; i++) {
+            const button = document.createElement("button");
+            button.textContent = i === 10 ? "X" : i;
+            button.addEventListener("click", () => handleRoll(i));
+            if (rolls[currentRoll] === i) {
+                button.classList.add("selected");
+            }
+            inputButtons.appendChild(button);
+        }
+
+        if ((currentRoll === 1 && currentFrame < 9 && rolls[0] < 10) ||
+            (currentFrame === 9 && ((currentRoll === 1 && rolls[0] !== 10) ||
+            (currentRoll === 2 && rolls[0] === 10 && rolls[1] !== 10)))) {
+            if (maxPins > 0) {
+                const spareButton = document.createElement("button");
+                spareButton.textContent = "/";
+                spareButton.addEventListener("click", () => handleRoll(maxPins));
+                if (rolls[currentRoll] === maxPins) {
+                    spareButton.classList.add("selected");
+                }
+                inputButtons.appendChild(spareButton);
+            }
+        }
+
+        inputArea.style.display = "flex";
     }
-}
 
     function handleRoll(pins) {
         const frame = gameScores[currentFrame];
@@ -181,33 +180,36 @@ function initializeGame(containerElement) {
         calculateScores();
     }
 
-    function updateFrameDisplay() {
-        const frames = framesContainer.children;
-        gameScores.forEach((game, index) => {
-            const frame = frames[index];
-            const rolls = game.rolls;
-            const rollDisplays = frame.querySelectorAll('.roll1, .roll2, .roll3');
+  function updateFrameDisplay(frameIndex) {
+  const frame = framesContainer.children[frameIndex];
+  const rolls = gameScores[frameIndex].rolls;
+  const rollDisplays = frame.querySelectorAll('.roll1, .roll2, .roll3');
 
-            rollDisplays.forEach((display, rollIndex) => {
-                if (rolls[rollIndex] !== undefined) {
-                    if ((rollIndex === 1 && index < 9 && rolls[0] + rolls[1] === 10) || 
-                        (index < 9 && rollIndex === 1 && rolls[0] === 0 && rolls[1] === 10) ||
-                        (index === 9 && ((rollIndex === 1 && rolls[0] + rolls[1] === 10 && rolls[0] !== 10) || 
-                        (rollIndex === 2 && rolls[1] + rolls[2] === 10)))) {
-                        display.textContent = '/';
-                    } else if (rolls[rollIndex] === 10) {
-                        display.textContent = 'X';
-                    } else {
-                        display.textContent = rolls[rollIndex];
-                    }
-                } else {
-                    display.textContent = '';
-                }
-            });
+ rollDisplays.forEach((display, index) => {
+    if (rolls[index] !== undefined) {
+      if (
+        // Spare conditions for frames 1-9 (unchanged)
+        (index === 1 && frameIndex < 9 && rolls[0] + rolls[1] === 10) || 
+        (frameIndex < 9 && index === 1 && rolls[0] === 0 && rolls[1] === 10) ||
 
-            frame.querySelector('.frame-bottom').textContent = game.score || '';
-        });
+        // Spare conditions for the 10th frame
+        (frameIndex === 9 && // 10th frame
+          ((index === 1 && rolls[0] + rolls[1] === 10 && rolls[0] !== 10) || // Spare on 2nd roll
+           (index === 2 && rolls[1] + rolls[2] === 10))) // Spare on 3rd roll
+      ) {
+        display.textContent = '/';
+      } else if (rolls[index] === 10) {
+        display.textContent = 'X';
+      } else {
+        display.textContent = rolls[index];
+      }
+    } else {
+      display.textContent = '';
     }
+  });
+
+  frame.querySelector('.frame-bottom').textContent = gameScores[frameIndex].score || '';
+}
 
     function calculateScores() {
         let totalScore = 0;
