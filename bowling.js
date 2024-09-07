@@ -85,6 +85,26 @@ function initializeGame(containerElement) {
         let maxPins = 10;
         let rollText = "";
 
+// Dynamically create input-area and input-buttons if they don't exist
+    let inputArea = document.getElementById('input-area');
+    if (!inputArea) {
+        inputArea = document.createElement('div');
+        inputArea.id = 'input-area';
+        inputArea.style.display = 'none'; // Hidden by default
+        document.body.appendChild(inputArea); // Append to the body or a specific container
+    }
+
+    let inputButtons = document.getElementById('input-buttons');
+    if (!inputButtons) {
+        inputButtons = document.createElement('div');
+        inputButtons.id = 'input-buttons';
+        inputArea.appendChild(inputButtons);
+    }
+
+    const rollInfo = document.getElementById('roll-info') || document.createElement('div');
+    rollInfo.id = 'roll-info';
+    inputArea.insertBefore(rollInfo, inputButtons);
+        
         const frame = gameScores[currentFrame];
         const rolls = frame.rolls;
 
