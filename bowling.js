@@ -267,7 +267,7 @@ document.getElementById('download-button').addEventListener('click', function() 
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${bowlerName.replace(/\s/g, '_')}_${gamble}.json`; // Formatting filename to include game label
+        a.download = `${bowlerName.replace(/\s/g, '_')}_${gameLabel}.json`; // Formatting filename to include game label
         a.click();
         URL.revokeObjectURL(url);
     });
@@ -275,7 +275,7 @@ document.getElementById('download-button').addEventListener('click', function() 
 
 
 
-
+const loadGameButton = document.getElementById('load-game');
 loadGameButton.addEventListener('change', (event) => {
     const file = event.target.files[0];
     if (file) {
