@@ -20,23 +20,28 @@ function analyzeFiles() {
         reader.onload = function(event) {
             try {
                 const data = JSON.parse(event.target.result);
-                let currentGameScore = 0;
-                let currentFrameCount = data.length;
-                
-                data.forEach(frame => {
-                    currentGameScore += frame.score;
-                    totalRolls += frame.rolls.length;
+                let gameScore = data[data.length - 1].score; // Final score is in the last frame
+                let strikeCount = 0;
+                let spareCount = 0;
+                let rollCount = 0;
 
-                    // Count strikes and spares
-                    if (frame.rolls.length === 1 && frame.rolls[0] === 10) {
-                        totalStrikes++;
-                    } else if (frame.rolls.length === 2 && frame.rolls[0] + frame.rolls[1] === 10) {
-                        totalSpares++;
+                data.forEach((frame, index) => {
+                    rollCount += frame.rolls.length;
+
+                    if (frame.rolls.length === 1) {
+                        strikeCount++;
+                    } else if (index < 9 && frame.rolls[0] + frame.rolls[1] === 10) {
+                        spareCount++;
+                    } else if (index === 9 && frame.rolls.length === 3 && frame.rolls[0] + frame.rolls[1] === 10) {
+                        spareCount++;
                     }
                 });
 
-                allScores.push(currentGameScore);
+                allScores.push(gameScore);
                 totalGames++;
+                totalStrikes += strikeCount;
+                totalSpares += spareCount;
+                totalRolls += rollCount;
 
                 processedFiles++;
                 if (processedFiles === files.length) {
