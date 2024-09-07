@@ -14,6 +14,13 @@ body {
     justify-content: center;
 }
 
+#add-bowler-button {
+    width: 150px; /* Smaller width */
+    padding: 5px 10px; /* Adjust padding as needed */
+    font-size: 14px; /* Smaller font size */
+}
+
+
 a.button-link {
     display: block;
     text-decoration: none;
@@ -187,6 +194,17 @@ h1 {
     margin-top: 15px;
     text-align: center;
 }
+
+.text-input {
+    background-color: #1a1a1a;
+    color: #00ff99;
+    border: 2px solid #00ff99;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 0.9rem;
+    width: 200px; /* Ensure consistent width */
+}
+
 
 #game-label input {
     margin-top: 5px;
@@ -389,4 +407,26 @@ h1 {
     #input-buttons button, #download-button, #file-input-container label {
         padding: 10px 15px;
     }
+}
+/* This styles the scrollbar itself */
+::-webkit-scrollbar {
+    height: 10px;  /* Height of the horizontal scrollbar */
+}
+
+/* This styles the track (part the thumb slides within) */
+::-webkit-scrollbar-track {
+    background: #1a1a1a;  /* Match the dark theme of your design */
+    border-radius: 5px;
+}
+
+/* This styles the thumb (the part that is draggable) */
+::-webkit-scrollbar-thumb {
+    background-color: #00ff99;  /* Neon green to match your style */
+    border-radius: 5px;
+    border: 2px solid #00ccff;  /* Optional: adds a border around the thumb */
+}
+
+/* Optional: style the thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+    background-color: #00ccff;
 }
