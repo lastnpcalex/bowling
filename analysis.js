@@ -21,7 +21,7 @@ function analyzeFiles() {
             try {
                 const data = JSON.parse(event.target.result);
                 let currentGameScore = 0;
-                let currentFrameCount = data.length; // Each file is likely to contain one game's frames
+                let currentFrameCount = data.length;
                 
                 data.forEach(frame => {
                     currentGameScore += frame.score;
@@ -35,8 +35,8 @@ function analyzeFiles() {
                     }
                 });
 
-                allScores.push(currentGameScore);  // Store the total score for this game
-                totalGames++;  // Increment total games processed
+                allScores.push(currentGameScore);
+                totalGames++;
 
                 processedFiles++;
                 if (processedFiles === files.length) {
@@ -52,8 +52,7 @@ function analyzeFiles() {
 }
 
 function displayResults(allScores, totalStrikes, totalSpares, totalRolls, totalGames) {
-    const totalScore = allScores.reduce((a, b) => a + b, 0);
-    const averageGameScore = totalScore / totalGames;  // Correct calculation: divide by number of games, not frames
+    const averageGameScore = allScores.reduce((a, b) => a + b, 0) / totalGames;
     globalStrikePercentage = (totalStrikes / totalRolls) * 100;
     globalSparePercentage = (totalSpares / (totalRolls - totalStrikes)) * 100;
     const maxScore = Math.max(...allScores);
@@ -85,7 +84,6 @@ function displayResults(allScores, totalStrikes, totalSpares, totalRolls, totalG
         console.error("Generate game button not found.");
     }
 }
-
 
 function calculateStandardDeviation(scores) {
     const n = scores.length;
@@ -215,7 +213,6 @@ function displayScorecard(game) {
     document.getElementById('scorecard').innerHTML = html;
 }
 
-// Add event listeners when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', (event) => {
     const analyzeButton = document.getElementById('analyze-button');
     if (analyzeButton) {
