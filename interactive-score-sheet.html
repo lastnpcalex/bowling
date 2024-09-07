@@ -5,61 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Bowling Scoresheet</title>
     <link rel="stylesheet" href="styles.css">
-<style>
-/* Additional styles for input consistency */
-.bowler-name, #game-name {
-    background-color: #1a1a1a;
-    color: #00ff99;
-    border: 2px solid #00ff99;
-    padding: 5px;
-    border-radius: 5px;
-    font-size: 0.9rem;
-    width: 200px; /* Adjust width as needed */
-    margin-bottom: 10px;
-}
-</style>
-
+    
+          
+  
 
 </head>
 <body>
-    <div class="neon-box">
+      <div class="neon-box">
         <div class="title-container">
-            <img src="11-50-09-660_512.webp" alt="Bowling GIF">
-            <h1>Interactive Bowling Scoresheet</h1>
-            <img src="11-50-09-660_512.webp" alt="Bowling GIF">
+        <img src="11-50-09-660_512.webp" alt="Bowling GIF">
+        <h1>Interactive Bowling Scoresheet</h1>
+        <img src="11-50-09-660_512.webp" alt="Bowling GIF">
         </div>
-
         <div class="instructions">
             <p>Click a frame to enter a score. To edit a frame, click it and enter a new score.</p>
         </div>
-
-
-<div id="all-scoresheets-container">
-    <div id="scoresheet" class="score-sheet" data-bowler-name="Bowler 1">
-        <input type="text" class="bowler-name text-input" value="Bowler 1" onchange="this.parentNode.setAttribute('data-bowler-name', this.value);">
-        <div class="frames-container">
-            <!-- Frames will be dynamically added here -->
+        <div id="scoresheet" class="score-sheet">
+            <div class="frames-container">
+                <!-- Frames will be dynamically added here -->
+            </div>
         </div>
-    </div>
-</div>
-<div id="add-bowler-container">
-    
-    <button id="add-bowler-button" class="cyberpunk-button" style="width: 150px; margin-bottom: 7px;">Add Bowler:</button>
-    <input type="text" id="new-bowler-name" placeholder="Enter Bowler Name" class="text-input">
-</div>
-<div id="game-label">
-    <label for="game-name">Game Label:</label>
-    <input type="text" id="game-name" class="text-input" value="">
-</div>
-
-
-        <div id="file-input-container">
+        <div id="input-area" style="display: none;">
+            <div id="roll-info"></div>
+            <div id="input-buttons"></div>
+        </div>
+       <div id="game-label">
+            <label for="game-name">Game Label:</label>
+            <input type="text" id="game-name" value="">
+	</div>
+	<div id="file-input-container">
             <button id="download-button" class="cyberpunk-button" style="width: 250px;">Download Game Data</button>
+   
             <label for="load-game" class="cyberpunk-button" style="width: 200px;">Load Game Data</label>
-            <input type="file" id="load-game" style="display:none;" accept=".json">
         </div>
     </div>
 
-    <script src="bowling.js"></script>
+
+<script src="bowling.js"></script>
+
+
+
+
 </body>
 </html>
