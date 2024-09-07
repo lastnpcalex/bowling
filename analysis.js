@@ -7,33 +7,40 @@ function analyzeFiles() {
         alert("Please select files to analyze.");
         return;
     }
-    let totalScore = 0;
+    
     let totalStrikes = 0;
     let totalSpares = 0;
     let totalFrames = 0;
     let totalRolls = 0;
     let processedFiles = 0;
-    let allScores = []; // Array to store all individual frame scores
+    let allScores = []; // Array to store all individual game scores
+    let totalGames = 0;  // Count total games processed
 
     Array.from(files).forEach((file, index) => {
         const reader = new FileReader();
         reader.onload = function(event) {
             try {
                 const data = JSON.parse(event.target.result);
+                let currentGameScore = 0;
                 data.forEach(frame => {
-                    totalScore += frame.score;
-                    allScores.push(frame.score);
+                    currentGameScore += frame.score;
                     totalFrames++;
                     totalRolls += frame.rolls.length;
+
+                    // Count strikes and spares
                     if (frame.rolls.length === 1 && frame.rolls[0] === 10) {
                         totalStrikes++;
                     } else if (frame.rolls.length === 2 && frame.rolls[0] + frame.rolls[1] === 10) {
                         totalSpares++;
                     }
                 });
+
+                allScores.push(currentGameScore);
+                totalGames++; // Increment total games processed
+
                 processedFiles++;
                 if (processedFiles === files.length) {
-                    displayResults(totalScore, totalStrikes, totalSpares, totalFrames, totalRolls, allScores);
+                    displayResults(allScores, totalStrikes, totalSpares, totalFrames, totalRolls);
                 }
             } catch (error) {
                 console.error("Error processing file:", error);
@@ -44,16 +51,16 @@ function analyzeFiles() {
     });
 }
 
-function displayResults(totalScore, totalStrikes, totalSpares, totalFrames, totalRolls, allScores) {
-    const averageScore = totalScore / totalFrames;
+function displayResults(allScores, totalStrikes, totalSpares, totalFrames, totalRolls) {
+    const averageGameScore = allScores.reduce((a, b) => a + b, 0) / allScores.length;
     globalStrikePercentage = (totalStrikes / totalRolls) * 100;
-    globalSparePercentage = (totalSpares / (totalRolls - totalStrikes)) * 100;
+    globalSparePercentage = (totalSpares / (totalFrames - totalStrikes)) * 100; // Improved spare calculation
     const maxScore = Math.max(...allScores);
     const minScore = Math.min(...allScores);
     const stdDev = calculateStandardDeviation(allScores);
 
     const resultElements = {
-        'average-score': `Average Score: ${averageScore.toFixed(2)}`,
+        'average-score': `Average Score: ${averageGameScore.toFixed(2)}`,
         'strike-percentage': `Strike Percentage: ${globalStrikePercentage.toFixed(2)}%`,
         'spare-percentage': `Spare Percentage: ${globalSparePercentage.toFixed(2)}%`,
         'max-score': `Max Score: ${maxScore}`,
@@ -155,7 +162,6 @@ function simulateBowlingGame(strikePercentage, sparePercentage) {
 
     return { score, frameScores, rolls };
 }
-
 
 function displayScorecard(game) {
     let html = '<div class="score-sheet">';
