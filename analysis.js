@@ -10,10 +10,10 @@ function analyzeFiles() {
     
     let totalStrikes = 0;
     let totalSpares = 0;
-    let totalRolls = 0;
+    let totalFramesWithSparesPossible = 0;
     let processedFiles = 0;
-    let allScores = []; // Array to store total game scores
-    let totalGames = 0;  // Count total games processed
+    let allScores = [];
+    let totalGames = 0;
 
     Array.from(files).forEach((file, index) => {
         const reader = new FileReader();
@@ -23,32 +23,46 @@ function analyzeFiles() {
                 let gameScore = data[data.length - 1].score; // Final score is in the last frame
                 let strikeCount = 0;
                 let spareCount = 0;
-                let rollCount = 0;
-
-               data.forEach((frame, index) => {
-    rollCount += frame.rolls.length;
-
-    // Loop through all rolls in the frame and count every 10 as a strike
-    frame.rolls.forEach((roll) => {
-        if (roll === 10) {
-            strikeCount++;
+                let framesWithSparesPossible = 10; // Every game starts with 10 possible spares
+                
+                data.forEach((frame, index) => {
+    // Count strikes in frames 1–9
+    if (index < 9) {
+        if (frame.rolls.length === 1 && frame.rolls[0] === 10) { 
+            strikeCount++; // Strike in frames 1–9
+            framesWithSparesPossible--; // Strike eliminates spare possibility
         }
-    });
+    }
 
-    // Check for spare (sum of first two rolls is 10 and it's not a strike)
+    // For the 10th frame (index 9):
+    if (index === 9) {
+        // First roll is a strike
+        if (frame.rolls[0] === 10) {
+            strikeCount++;
+            
+            // Second roll is a strike if the first roll is not zero
+            if (frame.rolls.length > 1 && frame.rolls[0] !== 0 && frame.rolls[1] === 10) {
+                strikeCount++;
+            }
+
+            // Check for a third strike, only if the third roll exists and the second roll is not 0
+            if (frame.rolls.length > 2 && frame.rolls[1] !== 0 && frame.rolls[2] === 10) {
+                strikeCount++;
+            }
+
+            // If no second and third strikes, check for spare
+            if (frame.rolls.length > 1 && frame.rolls[0] !== 10 && frame.rolls[1] + frame.rolls[2] === 10) {
+                spareCount++;
+            }
+        } else if (frame.rolls[0] + frame.rolls[1] === 10) {
+            // Spare in the 10th frame without a strike
+            spareCount++;
+        }
+    }
+
+    // Check for spares in frames 1–9
     if (index < 9 && frame.rolls.length > 1 && frame.rolls[0] + frame.rolls[1] === 10) {
         spareCount++;
-    } 
-    // Special case for 10th frame spare
-    else if (index === 9 && frame.rolls.length === 3) {
-        // If first roll is 10, check if the second and third rolls form a spare
-        if (frame.rolls[0] === 10 && frame.rolls[1] + frame.rolls[2] === 10) {
-            spareCount++;
-        }
-        // Otherwise, check if the first two rolls form a spare
-        else if (frame.rolls[0] + frame.rolls[1] === 10) {
-            spareCount++;
-        }
     }
 });
 
@@ -57,11 +71,11 @@ function analyzeFiles() {
                 totalGames++;
                 totalStrikes += strikeCount;
                 totalSpares += spareCount;
-                totalRolls += rollCount;
+                totalFramesWithSparesPossible += framesWithSparesPossible;
 
                 processedFiles++;
                 if (processedFiles === files.length) {
-                    displayResults(allScores, totalStrikes, totalSpares, totalRolls, totalGames);
+                    displayResults(allScores, totalStrikes, totalSpares, totalFramesWithSparesPossible, totalGames);
                 }
             } catch (error) {
                 console.error("Error processing file:", error);
@@ -72,10 +86,15 @@ function analyzeFiles() {
     });
 }
 
-function displayResults(allScores, totalStrikes, totalSpares, totalRolls, totalGames) {
+function displayResults(allScores, totalStrikes, totalSpares, totalFramesWithSparesPossible, totalGames) {
     const averageGameScore = allScores.reduce((a, b) => a + b, 0) / totalGames;
-    globalStrikePercentage = (totalStrikes / totalRolls) * 100;
-    globalSparePercentage = (totalSpares / (totalRolls - totalStrikes)) * 100;
+    
+    // Strike percentage is calculated based on total strikes out of 12 possible strikes per game
+    globalStrikePercentage = (totalStrikes / (totalGames * 12)) * 100;
+    
+    // Spare percentage is based on possible spares (excluding frames with strikes)
+    globalSparePercentage = (totalSpares / totalFramesWithSparesPossible) * 100;
+
     const maxScore = Math.max(...allScores);
     const minScore = Math.min(...allScores);
     const stdDev = calculateStandardDeviation(allScores);
@@ -105,6 +124,7 @@ function displayResults(allScores, totalStrikes, totalSpares, totalRolls, totalG
         console.error("Generate game button not found.");
     }
 }
+
 
 function calculateStandardDeviation(scores) {
     const n = scores.length;
