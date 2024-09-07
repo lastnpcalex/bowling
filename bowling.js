@@ -306,37 +306,3 @@ loadGameButton.addEventListener('change', (event) => {
     }
 });
 
-document.getElementById('reset-games-button').addEventListener('click', function() {
-    const allScoresheets = document.querySelectorAll('.score-sheet');
-    
-    allScoresheets.forEach(scoresheet => {
-        const framesContainer = scoresheet.querySelector('.frames-container');
-        const frames = framesContainer.querySelectorAll('.frame');
-        
-        frames.forEach(frame => {
-            // Clear the frame rolls
-            const rollDisplays = frame.querySelectorAll('.roll1, .roll2, .roll3');
-            rollDisplays.forEach(roll => {
-                roll.textContent = '';
-            });
-            
-            // Clear the score
-            const scoreDisplay = frame.querySelector('.frame-bottom');
-            scoreDisplay.textContent = '';
-        });
-    });
-
-    // Optionally, reset any internal game state variables (gameScores, currentFrame, etc.)
-    // For each score sheet, reset the gameScores array to reflect empty frames
-    allScoresheets.forEach(scoresheet => {
-        let gameScores = Array(10).fill().map(() => ({ rolls: [], score: 0 }));
-        let currentFrame = 0;
-        let currentRoll = 0;
-        let gameComplete = false;
-        // Ensure the scoresheet state is properly initialized
-        initializeGame(scoresheet);
-    });
-
-    alert('Games have been reset.');
-});
-
