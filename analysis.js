@@ -25,17 +25,33 @@ function analyzeFiles() {
                 let spareCount = 0;
                 let rollCount = 0;
 
-                data.forEach((frame, index) => {
-                    rollCount += frame.rolls.length;
+               data.forEach((frame, index) => {
+    rollCount += frame.rolls.length;
 
-                    if (frame.rolls.length === 1) {
-                        strikeCount++;
-                    } else if (index < 9 && frame.rolls[0] + frame.rolls[1] === 10) {
-                        spareCount++;
-                    } else if (index === 9 && frame.rolls.length === 3 && frame.rolls[0] + frame.rolls[1] === 10) {
-                        spareCount++;
-                    }
-                });
+    // Loop through all rolls in the frame and count every 10 as a strike
+    frame.rolls.forEach((roll) => {
+        if (roll === 10) {
+            strikeCount++;
+        }
+    });
+
+    // Check for spare (sum of first two rolls is 10 and it's not a strike)
+    if (index < 9 && frame.rolls.length > 1 && frame.rolls[0] + frame.rolls[1] === 10) {
+        spareCount++;
+    } 
+    // Special case for 10th frame spare
+    else if (index === 9 && frame.rolls.length === 3) {
+        // If first roll is 10, check if the second and third rolls form a spare
+        if (frame.rolls[0] === 10 && frame.rolls[1] + frame.rolls[2] === 10) {
+            spareCount++;
+        }
+        // Otherwise, check if the first two rolls form a spare
+        else if (frame.rolls[0] + frame.rolls[1] === 10) {
+            spareCount++;
+        }
+    }
+});
+
 
                 allScores.push(gameScore);
                 totalGames++;
