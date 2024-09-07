@@ -10,10 +10,9 @@ function analyzeFiles() {
     
     let totalStrikes = 0;
     let totalSpares = 0;
-    let totalFrames = 0;
     let totalRolls = 0;
     let processedFiles = 0;
-    let allScores = []; // Array to store all individual game scores
+    let allScores = []; // Array to store total game scores
     let totalGames = 0;  // Count total games processed
 
     Array.from(files).forEach((file, index) => {
@@ -22,9 +21,10 @@ function analyzeFiles() {
             try {
                 const data = JSON.parse(event.target.result);
                 let currentGameScore = 0;
+                let currentFrameCount = data.length; // Each file is likely to contain one game's frames
+                
                 data.forEach(frame => {
                     currentGameScore += frame.score;
-                    totalFrames++;
                     totalRolls += frame.rolls.length;
 
                     // Count strikes and spares
@@ -35,12 +35,12 @@ function analyzeFiles() {
                     }
                 });
 
-                allScores.push(currentGameScore);
-                totalGames++; // Increment total games processed
+                allScores.push(currentGameScore);  // Store the total score for this game
+                totalGames++;  // Increment total games processed
 
                 processedFiles++;
                 if (processedFiles === files.length) {
-                    displayResults(allScores, totalStrikes, totalSpares, totalFrames, totalRolls);
+                    displayResults(allScores, totalStrikes, totalSpares, totalRolls, totalGames);
                 }
             } catch (error) {
                 console.error("Error processing file:", error);
@@ -51,10 +51,11 @@ function analyzeFiles() {
     });
 }
 
-function displayResults(allScores, totalStrikes, totalSpares, totalFrames, totalRolls) {
-    const averageGameScore = allScores.reduce((a, b) => a + b, 0) / allScores.length;
+function displayResults(allScores, totalStrikes, totalSpares, totalRolls, totalGames) {
+    const totalScore = allScores.reduce((a, b) => a + b, 0);
+    const averageGameScore = totalScore / totalGames;  // Correct calculation: divide by number of games, not frames
     globalStrikePercentage = (totalStrikes / totalRolls) * 100;
-    globalSparePercentage = (totalSpares / (totalFrames - totalStrikes)) * 100; // Improved spare calculation
+    globalSparePercentage = (totalSpares / (totalRolls - totalStrikes)) * 100;
     const maxScore = Math.max(...allScores);
     const minScore = Math.min(...allScores);
     const stdDev = calculateStandardDeviation(allScores);
@@ -84,6 +85,7 @@ function displayResults(allScores, totalStrikes, totalSpares, totalFrames, total
         console.error("Generate game button not found.");
     }
 }
+
 
 function calculateStandardDeviation(scores) {
     const n = scores.length;
