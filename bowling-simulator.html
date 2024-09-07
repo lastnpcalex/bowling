@@ -51,16 +51,6 @@
             display: none;
             margin-top: 20px;
         }
-         .stats-container {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-        .stat-item {
-            flex-basis: 48%;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
@@ -253,75 +243,49 @@ function generateRepresentativeGame(strikePercentage, sparePercentage) {
     return html;
 }
 
-function calculateStats(scores) {
-        const min = Math.min(...scores);
-        const max = Math.max(...scores);
-        const mean = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-        const variance = scores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / scores.length;
-        const stdDev = Math.sqrt(variance);
-        return { min, max, mean, stdDev };
-    }
-    
 // Event listeners remain the same as in the previous version
 
 document.getElementById('simulate-button').addEventListener('click', () => {
-        const strikePercentage = parseFloat(document.getElementById('strike-percentage').value) || 0;
-        const sparePercentage = parseFloat(document.getElementById('spare-percentage').value) || 0;
-        const numSimulations = parseInt(document.getElementById('simulations').value) || 100;
+    const strikePercentage = parseFloat(document.getElementById('strike-percentage').value) || 0;
+    const sparePercentage = parseFloat(document.getElementById('spare-percentage').value) || 0;
+    const numSimulations = parseInt(document.getElementById('simulations').value) || 100;
 
-        const progressBarInner = document.getElementById('progress-bar-inner');
-        progressBarInner.style.width = '0%';
+    const progressBarInner = document.getElementById('progress-bar-inner');
+    progressBarInner.style.width = '0%';
 
-        let completedSimulations = 0;
-        let scores = [];
-        let simulationInterval = setInterval(() => {
-            if (completedSimulations < numSimulations) {
-                const result = simulateBowlingGame(strikePercentage, sparePercentage);
-                scores.push(result.score);
-                completedSimulations++;
-                progressBarInner.style.width = `${(completedSimulations / numSimulations) * 100}%`;
-                progressBarInner.textContent = `${Math.round((completedSimulations / numSimulations) * 100)}%`;
-            } else {
-                clearInterval(simulationInterval);
-                const stats = calculateStats(scores);
-                document.getElementById('result').innerHTML = `
-                    <div class="stats-container">
-                        <div class="stat-item"><strong>Average Score:</strong> ${stats.mean.toFixed(2)}</div>
-                        <div class="stat-item"><strong>Minimum Score:</strong> ${stats.min}</div>
-                        <div class="stat-item"><strong>Maximum Score:</strong> ${stats.max}</div>
-                        <div class="stat-item"><strong>Standard Deviation:</strong> ${stats.stdDev.toFixed(2)}</div>
-                    </div>
-                    ${generateRepresentativeGame(strikePercentage, sparePercentage)}
-                `;
-                document.getElementById('regenerate-game').style.display = 'block';
-            }
-        }, 50);
-    });
-
+    let completedSimulations = 0;
+    let totalScore = 0;
+    let simulationInterval = setInterval(() => {
+        if (completedSimulations < numSimulations) {
+            const result = simulateBowlingGame(strikePercentage, sparePercentage);
+            totalScore += result.score;
+            completedSimulations++;
+            progressBarInner.style.width = `${(completedSimulations / numSimulations) * 100}%`;
+            progressBarInner.textContent = `${Math.round((completedSimulations / numSimulations) * 100)}%`;
+        } else {
+            clearInterval(simulationInterval);
+            const averageScore = totalScore / numSimulations;
+            document.getElementById('result').innerHTML = `
+                <p>Simulation completed! Average score is ${averageScore.toFixed(2)}.</p>
+                ${generateRepresentativeGame(strikePercentage, sparePercentage)}
+            `;
+            document.getElementById('regenerate-game').style.display = 'block';
+        }
+    }, 50);
+});
 
 document.getElementById('regenerate-game').addEventListener('click', () => {
     const strikePercentage = parseFloat(document.getElementById('strike-percentage').value) || 0;
     const sparePercentage = parseFloat(document.getElementById('spare-percentage').value) || 0;
     
     const resultElement = document.getElementById('result');
-    // Preserve the stats container
-    const statsContainer = resultElement.querySelector('.stats-container');
-    
-    // Generate a new representative game
-    const newGame = generateRepresentativeGame(strikePercentage, sparePercentage);
-    
-    // Clear the result element
+    // Keep the average score paragraph and remove the old game
+    const averageScoreParagraph = resultElement.querySelector('p');
     resultElement.innerHTML = '';
-    
-    // Append the preserved stats container if it exists
-    if (statsContainer) {
-        resultElement.appendChild(statsContainer);
-    }
-    
-    // Create a new div for the game and append it
-    const gameDiv = document.createElement('div');
-    gameDiv.innerHTML = newGame;
-    resultElement.appendChild(gameDiv);
+    resultElement.appendChild(averageScoreParagraph);
+
+    const newGame = generateRepresentativeGame(strikePercentage, sparePercentage);
+    resultElement.innerHTML += newGame;
 });
 </script>
 
