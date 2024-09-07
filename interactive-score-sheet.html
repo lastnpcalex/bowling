@@ -5,17 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interactive Bowling Scoresheet</title>
     <link rel="stylesheet" href="styles.css">
-    
-          
-  
-
 </head>
 <body>
-      <div class="neon-box">
+    <div class="neon-box">
         <div class="title-container">
-        <img src="11-50-09-660_512.webp" alt="Bowling GIF">
-        <h1>Interactive Bowling Scoresheet</h1>
-        <img src="11-50-09-660_512.webp" alt="Bowling GIF">
+            <img src="11-50-09-660_512.webp" alt="Bowling GIF">
+            <h1>Interactive Bowling Scoresheet</h1>
+            <img src="11-50-09-660_512.webp" alt="Bowling GIF">
         </div>
         <div class="instructions">
             <p>Click a frame to enter a score. To edit a frame, click it and enter a new score.</p>
@@ -29,22 +25,18 @@
             <div id="roll-info"></div>
             <div id="input-buttons"></div>
         </div>
-       <div id="game-label">
+        <div id="game-label">
             <label for="game-name">Game Label:</label>
             <input type="text" id="game-name" value="">
-	</div>
-	<div id="file-input-container">
+        </div>
+        <div id="file-input-container">
             <button id="download-button" class="cyberpunk-button" style="width: 250px;">Download Game Data</button>
    
             <label for="load-game" class="cyberpunk-button" style="width: 200px;">Load Game Data</label>
+            <input type="file" id="load-game" style="display:none;" accept=".json">
         </div>
     </div>
 
-
-<script src="bowling.js"></script>
-
-
-
-
+    <script src="bowling.js"></script>
 </body>
 </html>
