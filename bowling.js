@@ -293,7 +293,7 @@ function updateFrameDisplay(game, frameIndex) {
                     if (rolls[0] === 10 || rolls[0] + rolls[1] === 10) {
                         if (rolls[2] === 10) {
                             display.textContent = 'X';
-                        } else if (rolls[1] + rolls[2] === 10 && rolls[1] !== 10) {
+                        } else if (rolls[1] + rolls[2] === 10 && rolls[1] !== 10 && rolls[0] === 10) {
                             display.textContent = '/';
                         } else {
                             display.textContent = rolls[2];
