@@ -41,18 +41,6 @@ function initializeGame(bowlerName = 'Bowler 1') {
     selectFrame(game, 0);
 }
 
-
-function addNewGameForAllBowlers() {
-    // Get the unique bowler names from the current games
-    const uniqueBowlers = [...new Set(games.map(game => game.bowlerName))];
-
-    // For each unique bowler, create a new game with the incremented game number
-    uniqueBowlers.forEach(bowlerName => {
-        initializeGame(bowlerName); // Initialize a new game for each bowler
-    });
-}
-
-
 function createGameUI(game) {
     const container = document.createElement('div');
     container.className = 'score-sheet';
@@ -84,6 +72,44 @@ function createGameUI(game) {
     createFrames(game);
 }
 
+function addNewGameForAllBowlers() {
+    // Get the current game number from the existing games' labels
+    let currentGameNumber = 1;
+    const existingGameLabels = games
+        .map(game => game.gameInfo)
+        .filter(label => label) // Filter out undefined or null labels
+        .map(label => {
+            const match = label.match(/Game(\d+)/);
+            return match ? parseInt(match[1], 10) : 1;
+        });
+
+    if (existingGameLabels.length > 0) {
+        // Extract the current highest game number
+        currentGameNumber = Math.max(...existingGameLabels) + 1;
+    }
+
+    // Get the unique bowler names from the current games
+    const uniqueBowlers = [...new Set(games.map(game => game.bowlerName))];
+
+    // For each unique bowler, create a new game with the incremented game number
+    uniqueBowlers.forEach(bowlerName => {
+        const now = new Date();
+        const formattedDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const newGameLabel = `Game${currentGameNumber}_${formattedDate}`;
+        initializeGame(bowlerName); // Create a new game for the bowler
+        const currentGame = games[games.length - 1]; // Get the most recently added game
+        currentGame.gameInfo = newGameLabel; // Set the new game number and date
+        
+        // Update the game info display in the UI
+        const gameInfoSpan = currentGame.containerElement.querySelector('.game-date');
+        if (gameInfoSpan) {
+            gameInfoSpan.textContent = newGameLabel;
+        }
+    });
+
+    // Increment the game number for the next round of new games
+    currentGameNumber++;
+}
 
 function createFrames(game) {
     const framesContainer = game.containerElement.querySelector('.frames-container');
@@ -319,37 +345,7 @@ function addBowler() {
     initializeGame(bowlerName);
 }
 
-function addNewGameForAllBowlers() {
-    // Get the current game number from the existing games' labels
-    let currentGameNumber = 1;
-    const existingGameLabels = games
-        .map(game => game.gameInfo)
-        .filter(label => label) // Filter out undefined or null labels
-        .map(label => {
-            const match = label.match(/Game(\d+)/);
-            return match ? parseInt(match[1], 10) : 1;
-        });
 
-    if (existingGameLabels.length > 0) {
-        // Extract the current highest game number
-        currentGameNumber = Math.max(...existingGameLabels) + 1;
-    }
-
-    // Get the unique bowler names from the current games
-    const uniqueBowlers = [...new Set(games.map(game => game.bowlerName))];
-
-    // For each unique bowler, create a new game with the incremented game number
-    uniqueBowlers.forEach(bowlerName => {
-        const newGameLabel = `Game${currentGameNumber}`;
-        initializeGame(bowlerName); // Create a new game for the bowler
-        const currentGame = games[games.length - 1]; // Get the most recently added game
-        currentGame.gameInfo = newGameLabel; // Set the new game number
-        setDefaultGameName(); // Update the game name in the UI
-    });
-
-    // Increment the game number for the next round of new games
-    currentGameNumber++;
-}
 
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -357,8 +353,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('add-bowler-button').addEventListener('click', addBowler);
     document.getElementById('download-button').addEventListener('click', downloadGames);
     document.getElementById('load-game').addEventListener('change', loadGames);
-
-    // Add event listener for the new "New Game for All Bowlers" button
     document.getElementById('new-game-button').addEventListener('click', addNewGameForAllBowlers);
 });
 
