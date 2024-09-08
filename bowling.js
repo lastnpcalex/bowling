@@ -278,18 +278,38 @@ function updateFrameDisplay(game, frameIndex) {
 
     rollDisplays.forEach((display, index) => {
         if (rolls[index] !== undefined) {
-            if (
-                (index === 1 && frameIndex < 9 && rolls[0] + rolls[1] === 10) || 
-                (frameIndex < 9 && index === 1 && rolls[0] === 0 && rolls[1] === 10) ||
-                (frameIndex === 9 && 
-                    ((index === 1 && rolls[0] + rolls[1] === 10 && rolls[0] !== 10) || 
-                    (index === 2 && rolls[1] + rolls[2] === 10)))
-            ) {
-                display.textContent = '/';
-            } else if (rolls[index] === 10) {
-                display.textContent = 'X';
-            } else {
-                display.textContent = rolls[index];
+            if (frameIndex === 9) {  // 10th frame
+                if (index === 0) {
+                    display.textContent = rolls[0] === 10 ? 'X' : rolls[0];
+                } else if (index === 1) {
+                    if (rolls[0] === 10) {
+                        display.textContent = rolls[1] === 10 ? 'X' : rolls[1];
+                    } else if (rolls[0] + rolls[1] === 10) {
+                        display.textContent = '/';
+                    } else {
+                        display.textContent = rolls[1];
+                    }
+                } else if (index === 2) {
+                    if (rolls[0] === 10 || rolls[0] + rolls[1] === 10) {
+                        if (rolls[2] === 10) {
+                            display.textContent = 'X';
+                        } else if (rolls[1] + rolls[2] === 10 && rolls[1] !== 10) {
+                            display.textContent = '/';
+                        } else {
+                            display.textContent = rolls[2];
+                        }
+                    } else {
+                        display.textContent = '';
+                    }
+                }
+            } else {  // Frames 1-9
+                if (index === 1 && rolls[0] + rolls[1] === 10) {
+                    display.textContent = '/';
+                } else if (rolls[index] === 10) {
+                    display.textContent = 'X';
+                } else {
+                    display.textContent = rolls[index];
+                }
             }
         } else {
             display.textContent = '';
