@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>3D Neon Bowling Alley – Complete with Pulse-Based Side Mountains</title>
+  <style>
+    body { margin: 0; overflow: hidden; background: #000; }
+  </style>
+</head>
+<body>
+  <!-- Three.js via CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script>
+    // -------------------------
+    // SETUP: SCENE, CAMERA, RENDERER
+    // -------------------------
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x000000);
+    
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 12, -5);
+    camera.lookAt(0, 3, 15);
+    
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+    
+    // -------------------------
+    // GLOBAL PARAMETERS
+    // -------------------------
+    const laneWidth    = 2;     // Lane is 2 units wide
+    const laneLength   = 60;    // Lane is 60 feet long
+    const boardsCount  = 10;    // For lane surface drawing
+    const boardWidth   = laneWidth / boardsCount;
+    // Ball size factor (adjust as desired for real-world proportions)
+    const ballRadius   = 1.0075 * boardWidth;
+    const laneElevation= 3;     // Lane and pins are elevated to this Y
+    
+    const gutterWidth  = boardWidth;
+    const gutterExtension = 5;
+    const platformWidth = laneWidth + 2 * gutterWidth;
+    const platformLength= laneLength + gutterExtension;
+    
+    // -------------------------
+    // PIN FORMATION PARAMETERS
+    // -------------------------
+    // Head pin at 52 ft, row 3 near 59 ft
+    const rowSpacing = (59 - 52) / 3;
+    const pinHeadZ   = 52;
+    
+    // -------------------------
+    // PRIMARY (PURPLE) TERRAIN with Black Fill
+    // -------------------------
+    const mountainWidth = 1000, mountainDepth = 400;
+    const mountainSegments = 350;
+    const mountainGeometry = new THREE.PlaneGeometry(mountainWidth, mountainDepth, mountainSegments, mountainSegments);
+    const mPos = mountainGeometry.attributes.position;
+    for (let i = 0; i < mPos.count; i++) {
+      const x = mPos.getX(i);
+      const y = mPos.getY(i);
+      const z = Math.sin(x * 0.15) * Math.cos(y * 0.15) * 3 + (Math.random() - 0.5) * 0.5;
+      mPos.setZ(i, z);
+    }
+    mPos.needsUpdate = true;
+    mountainGeometry.rotateX(-Math.PI / 2);
+    
+    // Create neon purple wireframe from the same geometry
+    const mountainWire = new THREE.WireframeGeometry(mountainGeometry);
+    const mountainWireMat = new THREE.LineBasicMaterial({ color: 0x8a2be2 });
+    const wireMesh = new THREE.LineSegments(mountainWire, mountainWireMat);
+    
+    // Create solid black fill mesh using the same geometry
+    const mountainFillMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
+    const fillMesh = new THREE.Mesh(mountainGeometry, mountainFillMat);
+    
+    // Group the fill and wireframe together
+    const primaryTerrainGroup = new THREE.Group();
+    primaryTerrainGroup.add(fillMesh);
+    primaryTerrainGroup.add(wireMesh);
+    primaryTerrainGroup.position.set(0, laneElevation - 0.75, -75);
+    scene.add(primaryTerrainGroup);
+    
+    // -------------------------
+    // NIGHT SKY (Star Field)
+    // -------------------------
+    (function(){
+      const starGeometry = new THREE.BufferGeometry();
+      const starCount = 1000;
+      const starVertices = [];
+      for (let i = 0; i < starCount; i++) {
+        const x = (Math.random() - 0.5) * 200;
+        const y = Math.random() * 100 + 50;
+        const z = -Math.random() * 200 - 50;
+        starVertices.push(x, y, z);
+      }
+      starGeometry.setAttribute('position', new THREE.Float32BufferAttribute(starVertices, 3));
+      const starMaterial = new THREE.PointsMaterial({ color: 0xffffff, size: 1 });
+      const starField = new THREE.Points(starGeometry, starMaterial);
+      scene.add(starField);
+    })();
+
+
+function addRetroSun() {
+  // Create a group to hold the sun’s rings.
+  const sunGroup = new THREE.Group();
+  // Position the sun so it appears in the distance near the horizon.
+  // Adjust these values as needed.
+  sunGroup.position.set(0, laneElevation - 25, 150);
+  
+  // Define sun parameters.
+  const numStripes = 3;           // Number of concentric stripes
+  const outerRadius = 60;         // Overall sun radius (increased for visibility)
+  const stripeWidth = outerRadius / numStripes;
+  // Colors that match your scene’s cyan, pink, and purple.
+  const colors = [0xff00ff, 0x00ffff, 0x8a2be2];
+  
+  // Create each ring (annulus) to form the striped sun.
+  for (let i = 0; i < numStripes; i++) {
+    const innerR = i * stripeWidth;
+    const outerR = (i + 1) * stripeWidth;
+    const ringGeom = new THREE.RingGeometry(innerR, outerR, 64);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: colors[i],
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.9,
+      depthTest: true
+    });
+    const ringMesh = new THREE.Mesh(ringGeom, ringMat);
+    // Remove or comment out the rotation so the ring remains vertical:
+    // ringMesh.rotation.x = -Math.PI / 2;
+    
+    sunGroup.add(ringMesh);
+  }
+  
+  scene.add(sunGroup);
+}
+
+
+
+
+    
+    // -------------------------
+    // PLATFORM (Alley Base)
+    // -------------------------
+    (function(){
+      const platformGeom = new THREE.PlaneGeometry(platformWidth, platformLength);
+      const platformMat  = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
+      const platformMesh = new THREE.Mesh(platformGeom, platformMat);
+      platformMesh.rotation.x = -Math.PI / 2;
+      platformMesh.position.set(0, laneElevation, platformLength / 2);
+      scene.add(platformMesh);
+    })();
+    
+    // -------------------------
+    // BOWLING LANE (Wireframe)
+    // -------------------------
+    (function(){
+      const laneGeometry = new THREE.PlaneGeometry(laneWidth, laneLength, boardsCount, 1);
+      const laneWireGeo  = new THREE.WireframeGeometry(laneGeometry);
+      const laneMat      = new THREE.LineBasicMaterial({ color: 0x00ffff });
+      const laneMesh     = new THREE.LineSegments(laneWireGeo, laneMat);
+      laneMesh.rotation.x = -Math.PI / 2;
+      laneMesh.position.set(0, laneElevation + 0.01, laneLength / 2);
+      scene.add(laneMesh);
+    })();
+    
+    // -------------------------
+    // GUTTERS
+    // -------------------------
+    (function(){
+      const gutterGeometry = new THREE.PlaneGeometry(gutterWidth, laneLength + gutterExtension, 1, 1);
+      const gutterWire = new THREE.WireframeGeometry(gutterGeometry);
+      const gutterMat  = new THREE.LineBasicMaterial({ color: 0xff00ff });
+      
+      const leftGutter = new THREE.LineSegments(gutterWire, gutterMat);
+      leftGutter.rotation.x = -Math.PI / 2;
+      leftGutter.position.set(-laneWidth / 2 - gutterWidth / 2, laneElevation + 0.005, (laneLength + gutterExtension) / 2);
+      scene.add(leftGutter);
+      
+      const rightGutter = new THREE.LineSegments(gutterWire.clone(), gutterMat);
+      rightGutter.rotation.x = -Math.PI / 2;
+      rightGutter.position.set(laneWidth / 2 + gutterWidth / 2, laneElevation + 0.005, (laneLength + gutterExtension) / 2);
+      scene.add(rightGutter);
+    })();
+    
+    // -------------------------
+    // PULSE-BASED SIDE MOUNTAINS
+    // -------------------------
+    // This function now accepts a "margin" parameter so that pulses aren't generated near the inner edge.
+    function createPulseMountPlane(numPulses, width, length, segments, baselineOffset = -2, minPulseX = -width/2, maxPulseX = width/2, margin = 0) {
+      // Define effective pulse range along x:
+      const effectiveMin = minPulseX + margin;
+      const effectiveMax = maxPulseX - margin;
+      
+      // 1) Define random pulses with x restricted to [effectiveMin, effectiveMax]:
+      const pulses = [];
+      for (let i = 0; i < numPulses; i++) {
+        const cx = effectiveMin + Math.random() * (effectiveMax - effectiveMin);
+        const cy = (Math.random() - 0.5) * length;
+        const amp = 5 + Math.random() * 4;
+        const freq = 0.01 + Math.random() * 0.02;
+        pulses.push({ cx, cy, amp, freq });
+      }
+      
+      // 2) Create the plane geometry
+      const geom = new THREE.PlaneGeometry(width, length, segments, segments);
+      const pos = geom.attributes.position;
+      
+      // 3) For each vertex, sum contributions from all pulses and add the baseline offset
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        let zVal = 0;
+        for (const p of pulses) {
+          const dx = x - p.cx;
+          const dy = y - p.cy;
+          const dist2 = dx * dx + dy * dy;
+          zVal += p.amp * Math.exp(-dist2 * p.freq);
+        }
+        pos.setZ(i, baselineOffset + zVal);
+      }
+      pos.needsUpdate = true;
+      
+      // 4) Rotate the plane so it's horizontal
+      geom.rotateX(-Math.PI / 2);
+      
+      // 5) Create a black fill mesh
+      const fillMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
+      const fillMesh = new THREE.Mesh(geom, fillMat);
+      
+      // 6) Create a wireframe overlay (neon purple)
+      const wireGeo = new THREE.WireframeGeometry(geom);
+      const wireMat = new THREE.LineBasicMaterial({ color: 0x8a2be2 });
+      const wireMesh = new THREE.LineSegments(wireGeo, wireMat);
+      
+      // 7) Return group containing both fill and wire
+      const group = new THREE.Group();
+      group.add(fillMesh);
+      group.add(wireMesh);
+      return group;
+    }
+    
+    // Create left side mountains
+    (function(){
+      const numPulses = 300; 
+      const sideMountWidth = 800; 
+      const sideMountLength = 150; 
+      const sideMountSegments = 80; 
+      // For left mountain, restrict pulses to be away from the inner edge.
+      // Here we use full range from -sideMountWidth/2 to -50.
+      const leftPlane = createPulseMountPlane(numPulses, sideMountWidth, sideMountLength, sideMountSegments, -5, -sideMountWidth/2, -50, 20);
+      
+      // Position the left plane so its right edge is near x = -2.
+      // Adjusted position so it's visible (try x = -100)
+      leftPlane.position.set(50, laneElevation , laneLength );
+      scene.add(leftPlane);
+    })();
+    
+    // Create right side mountains
+    (function(){
+      const numPulses = 300;
+      const sideMountWidth = 800;
+      const sideMountLength = 150;
+      const sideMountSegments = 100;
+      // For right mountain, restrict pulses to be away from the inner edge: from 50 to sideMountWidth/2.
+      const rightPlane = createPulseMountPlane(numPulses, sideMountWidth, sideMountLength, sideMountSegments, -5, 50, sideMountWidth/2, 20);
+      
+      // Position the right plane so its left edge is near x = +2.
+      // Adjusted position so it's visible (try x = +100)
+      rightPlane.position.set(-50, laneElevation , laneLength );
+      scene.add(rightPlane);
+    })();
+    
+    // -------------------------
+    // TARGETING ARROWS (Approach Markers)
+    // -------------------------
+    const arrowGroup = new THREE.Group();
+    scene.add(arrowGroup);
+    (function(){
+      const boardUnit = laneWidth / 39; // Assuming a 39-board division.
+      const arrowSpecs = [
+        { board: 5,  z: 15 },
+        { board: 10, z: 14 },
+        { board: 15, z: 13 },
+        { board: 20, z: 12 }, // center arrow (front)
+        { board: 25, z: 13 },
+        { board: 30, z: 14 },
+        { board: 35, z: 15 }
+      ];
+      const arrowWidth = 0.1, arrowLength = 0.5;
+      function createArrowMarker(x, z) {
+        const geom = new THREE.BufferGeometry();
+        const vertices = new Float32Array([
+          0, 0, 0,
+          -arrowWidth/2, 0, arrowLength,
+           arrowWidth/2, 0, arrowLength,
+          0, 0, 0
+        ]);
+        geom.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+        const mat = new THREE.LineBasicMaterial({ color: 0xff00ff });
+        const arrow = new THREE.Line(geom, mat);
+        arrow.position.set(x, laneElevation + 0.02, z);
+        return arrow;
+      }
+      arrowSpecs.forEach(spec => {
+        const x = (spec.board - 20) * boardUnit;
+        const arrow = createArrowMarker(x, spec.z);
+        arrowGroup.add(arrow);
+      });
+    })();
+    
+    // -------------------------
+    // RANGE FINDER SQUARES (Lofting & Spinner Guides)
+    // -------------------------
+    (function(){
+      const squareGroup = new THREE.Group();
+      scene.add(squareGroup);
+      function createSquareMarker(zPos) {
+        const size = 0.25;
+        const squareGeom = new THREE.PlaneGeometry(size, size);
+        const squareMat = new THREE.MeshBasicMaterial({ color: 0xff00ff, side: THREE.DoubleSide });
+        const square = new THREE.Mesh(squareGeom, squareMat);
+        square.rotation.x = -Math.PI/2;
+        square.position.set(0, laneElevation+0.02, zPos);
+        return square;
+      }
+      squareGroup.add(createSquareMarker(35.5));
+      squareGroup.add(createSquareMarker(41.5));
+    })();
+    
+    // -------------------------
+    // BOWLING PINS (3D, Wireframe)
+    // -------------------------
+    // Define pinRadius in global scope so it is accessible
+    function pinRadius(y) {
+      let term = 1 - 2 * Math.pow(1.5 * y - 2, 2) * Math.sin(y - 2);
+      if (term < 0) term = 0;
+      return (1 / 1.5) * Math.atan(Math.sqrt(term / 4));
+    }
+    function pinParametric(u, v, target) {
+      const heightPin = 3;
+      const y = v * heightPin;
+      const r = pinRadius(y);
+      const angle = u * 2 * Math.PI;
+      const x = r * Math.cos(angle);
+      const z = r * Math.sin(angle);
+      target.set(x, y, z);
+    }
+    // Declare pinGeometry globally
+    let pinGeometry = new THREE.ParametricBufferGeometry(pinParametric, 32, 16);
+    const pinMatGlobal = new THREE.LineBasicMaterial({ color: 0xff00ff });
+    const maxPinR = pinRadius(0);
+    const pinScale = boardWidth / (2 * maxPinR);
+    
+    const pinGroup = new THREE.Group();
+    pinGroup.position.y = laneElevation;
+    scene.add(pinGroup);
+    (function createPins() {
+      const rowCount = 4;
+      const spacing = 0.5;
+      for (let i = 0; i < rowCount; i++) {
+        const pinsInRow = i + 1;
+        const rowZ = pinHeadZ + i * rowSpacing;
+        for (let j = 0; j < pinsInRow; j++) {
+          const offset = (j - (pinsInRow - 1) / 2) * spacing;
+          const wireGeo = new THREE.WireframeGeometry(pinGeometry);
+          const pinMesh = new THREE.LineSegments(wireGeo, pinMatGlobal);
+          pinMesh.scale.set(pinScale, pinScale, pinScale);
+          pinMesh.position.set(offset, 0, rowZ);
+          pinGroup.add(pinMesh);
+        }
+      }
+    })();
+    
+    // -------------------------
+    // BOWLING BALL (Wireframe Sphere)
+    // -------------------------
+    const ballGeometry = new THREE.SphereGeometry(ballRadius, 16, 16);
+    const ballWireGeo  = new THREE.WireframeGeometry(ballGeometry);
+    const ballMat      = new THREE.LineBasicMaterial({ color: 0x00ffff });
+    const ballMesh     = new THREE.LineSegments(ballWireGeo, ballMat);
+    ballMesh.position.set(0, laneElevation + ballRadius, 1);
+    scene.add(ballMesh);
+    
+    // -------------------------
+    // BALL STATE & SIMULATION LOGIC (Including Post-Break Hook)
+    // -------------------------
+    const arrowGroupChildren = arrowGroup.children; // used for selecting target arrow
+    const selectedTarget = arrowGroupChildren[2];   // e.g., 3rd arrow => board 15
+    const ballState = {
+      velocity: new THREE.Vector3(0,0,0),
+      inGutter: false,
+      isSpare: false
+    };
+    const breakPoint = 35; // After this z, apply hook
+    const hookFactor = -0.0002675; // Negative to hook left
+    
+    function resetPins() {
+      while (pinGroup.children.length > 0) {
+        pinGroup.remove(pinGroup.children[0]);
+      }
+      (function createPinsAgain() {
+        const rowCount = 4;
+        const spacing = 0.5;
+        for (let i = 0; i < rowCount; i++) {
+          const pinsInRow = i + 1;
+          const rowZ = pinHeadZ + i * rowSpacing;
+          for (let j = 0; j < pinsInRow; j++) {
+            const offset = (j - (pinsInRow - 1) / 2) * spacing;
+            const wireGeo = new THREE.WireframeGeometry(pinGeometry);
+            const pinMesh = new THREE.LineSegments(wireGeo, pinMatGlobal);
+            pinMesh.scale.set(pinScale, pinScale, pinScale);
+            pinMesh.position.set(offset, 0, rowZ);
+            pinGroup.add(pinMesh);
+          }
+        }
+      })();
+    }
+    
+    function resetBall() {
+      ballMesh.position.set(0, laneElevation + ballRadius, 1);
+      const startPos = ballMesh.position.clone();
+      const targetPos = selectedTarget.position.clone();
+      const dir = new THREE.Vector3().subVectors(targetPos, startPos);
+      dir.y = 0;
+      dir.normalize();
+      const speedMag = 0.2;
+      dir.multiplyScalar(speedMag);
+      ballState.velocity.copy(dir);
+      ballState.inGutter = false;
+    }
+    
+    function animate() {
+      requestAnimationFrame(animate);
+      
+      ballMesh.position.add(ballState.velocity);
+      
+      // Apply hook after break point
+      if (ballMesh.position.z > breakPoint && !ballState.inGutter) {
+        ballState.velocity.x -= hookFactor;
+      }
+      
+      // Gutter detection
+      if (!ballState.inGutter) {
+        if (Math.abs(ballMesh.position.x) > laneWidth / 2) {
+          ballState.inGutter = true;
+        }
+      } else {
+        ballState.velocity.y -= 0.001;
+      }
+      
+      // Reset ball if it falls below the lane
+      if (ballMesh.position.y < laneElevation - 1) {
+        resetBall();
+      }
+      
+      // If ball passes pins and is in-lane, decide strike/spare
+      if (ballMesh.position.z > pinHeadZ + 1 && Math.abs(ballMesh.position.x) <= laneWidth / 2 && !ballState.inGutter) {
+        const strike = Math.random() > 0.3; // 70% strike chance
+        if (!strike && !ballState.isSpare) {
+          ballState.isSpare = true;
+        } else {
+          ballState.isSpare = false;
+          resetPins();
+        }
+        resetBall();
+      }
+      
+      // Reset ball if it travels beyond the platform
+      if (ballMesh.position.z > platformLength) {
+        resetBall();
+      }
+      
+      renderer.render(scene, camera);
+    }
+
+    addRetroSun();
+    resetBall();
+    animate();
+    
+    // -------------------------
+    // HANDLE WINDOW RESIZE
+    // -------------------------
+    window.addEventListener("resize", () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
