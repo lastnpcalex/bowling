@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>3D Neon Bowling Alley – Vaporwave Sun + Selective Glow</title>
+  <title>3D Neon Bowling Alley – Vaporwave Sun + Tracer Effect</title>
   <style>
     body { margin: 0; overflow: hidden; background: #000; }
   </style>
@@ -25,23 +25,18 @@
     // -------------------------
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x000000);
-
-    const camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.set(0, 12, -5);
     camera.lookAt(0, 3, 15);
 
     // -------------------------
-    // RENDERER & POSTPROCESSING
+    // RENDERER & EFFECT COMPOSER (for bloom)
     // -------------------------
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
-
-    // Create the postprocessing composer
     const composer = new THREE.EffectComposer(renderer);
-    const renderPass = new THREE.RenderPass(scene, camera);
-    composer.addPass(renderPass);
-    // Adjust these bloom parameters as desired.
+    composer.addPass(new THREE.RenderPass(scene, camera));
     const bloomPass = new THREE.UnrealBloomPass(
       new THREE.Vector2(window.innerWidth, window.innerHeight),
       1.3,  // strength
@@ -59,16 +54,12 @@
     const boardWidth = laneWidth / boardsCount;
     const ballRadius = 1.0075 * boardWidth;
     const laneElevation = 3;
-
     const gutterWidth = boardWidth;
     const gutterExtension = 5;
     const platformWidth = laneWidth + 2 * gutterWidth;
     const platformLength = laneLength + gutterExtension;
-
     const rowSpacing = (59 - 52) / 3;
     const pinHeadZ = 52;
-
-   
 
     // -------------------------
     // NIGHT SKY (Star Field)
@@ -90,30 +81,22 @@
     })();
 
     // -------------------------
-    // HELPER: Create a Circle Slice Shape
-    // Returns the intersection of a circle of radius r (centered at 0,0) 
-    // with the horizontal band [yLow, yHigh] (0 <= yLow < yHigh <= r).
-    // The shape’s left/right boundaries are the circular arcs.
-    // segments controls the smoothness of the arcs.
+    // VAPORWAVE SUN
     // -------------------------
     function createCircleSliceShape(r, yLow, yHigh, segments = 20) {
       const shape = new THREE.Shape();
       const xTopRight = Math.sqrt(r*r - yHigh*yHigh);
       shape.moveTo(xTopRight, yHigh);
-      // Top edge: horizontal line to left.
       const xTopLeft = -xTopRight;
       shape.lineTo(xTopLeft, yHigh);
-      // Left arc: sample from y=yHigh down to y=yLow
       for (let i = 0; i <= segments; i++){
         const t = i / segments;
         const y = yHigh - t * (yHigh - yLow);
         const x = -Math.sqrt(r*r - y*y);
         shape.lineTo(x, y);
       }
-      // Bottom edge: horizontal line from left to right.
       const xBottomRight = Math.sqrt(r*r - yLow*yLow);
       shape.lineTo(xBottomRight, yLow);
-      // Right arc: sample from y=yLow up to y=yHigh
       for (let i = 0; i <= segments; i++){
         const t = i / segments;
         const y = yLow + t * (yHigh - yLow);
@@ -123,36 +106,21 @@
       shape.lineTo(xTopRight, yHigh);
       return shape;
     }
-
-    // -------------------------
-    // VAPORWAVE SUN WITH TRUE CIRCLE SLICES
-    // -------------------------
-    // This function slices the half-disc (upper half of a circle of radius r)
-    // into horizontal bands. Each band is the exact intersection of the band [yLow, yHigh]
-    // with the circle (so its left/right boundaries are arcs of the circle).
-    // The resulting stripes are then colored using a gradient that goes through
-    // cyan, pink, orange, and red.
-    function createVaporwaveSunRounded({
-      radius = 40,
-      stripes = 8
-    } = {}) {
+    function createVaporwaveSunRounded({ radius = 40, stripes = 8 } = {}) {
       const sunGroup = new THREE.Group();
       const bandHeight = radius / stripes;
-      // Define color stops for the gradient.
       const colorStops = [
-        new THREE.Color(0x00ffff), // cyan
-        new THREE.Color(0xff00ff), // pink
-        new THREE.Color(0xffa500), // orange
-        new THREE.Color(0xff4500)  // red-orange
+        new THREE.Color(0x00ffff),
+        new THREE.Color(0xff00ff),
+        new THREE.Color(0xffa500),
+        new THREE.Color(0xff4500)
       ];
       for (let i = 0; i < stripes; i++) {
         const yLow = i * bandHeight;
         const yHigh = (i+1) * bandHeight;
         const shape = createCircleSliceShape(radius, yLow, yHigh, 20);
         const geometry = new THREE.ShapeGeometry(shape);
-        // Compute a gradient parameter t across stripes.
         const t = stripes === 1 ? 0 : i/(stripes-1);
-        // Interpolate across the color stops.
         const n = colorStops.length;
         const scaled = t*(n-1);
         const index = Math.floor(scaled);
@@ -160,7 +128,6 @@
         const startColor = colorStops[index];
         const endColor = colorStops[index+1] || startColor;
         const stripeColor = new THREE.Color().lerpColors(startColor, endColor, frac);
-        // Use a material with additive blending and toneMapped disabled to boost brightness.
         const material = new THREE.MeshBasicMaterial({
           color: stripeColor,
           side: THREE.DoubleSide,
@@ -169,26 +136,15 @@
           blending: THREE.AdditiveBlending,
           opacity: 1.0
         });
-        // Multiply the color intensity to ensure it stands out.
         material.color.multiplyScalar(2);
         const stripeMesh = new THREE.Mesh(geometry, material);
-        // Position the stripe so that its local coordinates match the circle’s coordinate system.
-        // (Our shape was built in the circle centered at (0,0); we want the half-disc from y=0 to y=radius.)
-        // Shift the stripe upward by its midpoint.
         stripeMesh.position.y = (yLow + yHigh) / 2;
         sunGroup.add(stripeMesh);
       }
-      // Shift the whole group so that the half-disc spans roughly from y = -radius/2 to +radius/2.
       sunGroup.position.y = -radius/2;
       return sunGroup;
     }
-
-    // Create and position the vaporwave sun with rounded slices.
-    const sun = createVaporwaveSunRounded({
-      radius: 40,
-      stripes: 8
-    });
-    // Place it behind the terrain so it appears at the horizon.
+    const sun = createVaporwaveSunRounded({ radius: 40, stripes: 8 });
     sun.position.set(0, laneElevation - 5, 150);
     scene.add(sun);
 
@@ -238,72 +194,61 @@
     // PULSE-BASED SIDE MOUNTAINS
     // -------------------------
     function createPulseMountPlane(numPulses, width, length, segments, baselineOffset = -2, minPulseX = -width/2, maxPulseX = width/2, margin = 0) {
-  const effectiveMin = minPulseX + margin;
-  const effectiveMax = maxPulseX - margin;
-  const pulses = [];
-  for (let i = 0; i < numPulses; i++){
-    const cx = effectiveMin + Math.random() * (effectiveMax - effectiveMin);
-    const cy = (Math.random() - 0.5) * length;
-    const amp = 5 + Math.random() * 4;
-    const freq = 0.01 + Math.random() * 0.02;
-    pulses.push({ cx, cy, amp, freq });
-  }
-  
-  const geom = new THREE.PlaneGeometry(width, length, segments, segments);
-  const pos = geom.attributes.position;
-  for (let i = 0; i < pos.count; i++){
-    const x = pos.getX(i);
-    const y = pos.getY(i);
-    let zVal = 0;
-    for (const p of pulses){
-      const dx = x - p.cx;
-      const dy = y - p.cy;
-      const dist2 = dx * dx + dy * dy;
-      zVal += p.amp * Math.exp(-dist2 * p.freq);
+      const effectiveMin = minPulseX + margin;
+      const effectiveMax = maxPulseX - margin;
+      const pulses = [];
+      for (let i = 0; i < numPulses; i++){
+        const cx = effectiveMin + Math.random() * (effectiveMax - effectiveMin);
+        const cy = (Math.random() - 0.5) * length;
+        const amp = 5 + Math.random() * 4;
+        const freq = 0.01 + Math.random() * 0.02;
+        pulses.push({ cx, cy, amp, freq });
+      }
+      const geom = new THREE.PlaneGeometry(width, length, segments, segments);
+      const pos = geom.attributes.position;
+      for (let i = 0; i < pos.count; i++){
+        const x = pos.getX(i);
+        const y = pos.getY(i);
+        let zVal = 0;
+        for (const p of pulses){
+          const dx = x - p.cx;
+          const dy = y - p.cy;
+          const dist2 = dx * dx + dy * dy;
+          zVal += p.amp * Math.exp(-dist2 * p.freq);
+        }
+        pos.setZ(i, baselineOffset + zVal);
+      }
+      pos.needsUpdate = true;
+      geom.rotateX(-Math.PI/2);
+      const fillMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
+      const fillMesh = new THREE.Mesh(geom, fillMat);
+      const wireGeo = new THREE.WireframeGeometry(geom);
+      const wireMat = new THREE.LineBasicMaterial({
+        color: new THREE.Color(0x8a2be2),
+        linewidth: 1,
+        toneMapped: false,
+        transparent: true,
+        blending: THREE.AdditiveBlending
+      });
+      const wireMesh = new THREE.LineSegments(wireGeo, wireMat);
+      wireMesh.position.y += 0.01;
+      const group = new THREE.Group();
+      group.add(fillMesh);
+      group.add(wireMesh);
+      return group;
     }
-    pos.setZ(i, baselineOffset + zVal);
-  }
-  pos.needsUpdate = true;
-  geom.rotateX(-Math.PI/2);
-
-  // Create the filled mesh (non-glowing)
-  const fillMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
-  const fillMesh = new THREE.Mesh(geom, fillMat);
-
-  // Create the wireframe grid.
-  const wireGeo = new THREE.WireframeGeometry(geom);
-  const wireMat = new THREE.LineBasicMaterial({
-    color: new THREE.Color(0x8a2be2), // base purple
-    linewidth: 1,
-    toneMapped: false,
-    transparent: true,
-    blending: THREE.AdditiveBlending
-  });
-  const wireMesh = new THREE.LineSegments(wireGeo, wireMat);
-  // Offset the grid slightly upward to avoid z-clipping with the fill mesh.
-  wireMesh.position.y += 0.01;
-
-  const group = new THREE.Group();
-  group.add(fillMesh);
-  group.add(wireMesh);
-  return group;
-}
-
-// Create the left side mountain plane.
-(function(){
-  const numPulses = 300, sideMountWidth = 800, sideMountLength = 150, sideMountSegments = 80;
-  const leftPlane = createPulseMountPlane(numPulses, sideMountWidth, sideMountLength, sideMountSegments, -5, -sideMountWidth/2, -50, 20);
-  leftPlane.position.set(50, laneElevation, laneLength);
-  scene.add(leftPlane);
-})();
-
-// Create the right side mountain plane.
-(function(){
-  const numPulses = 300, sideMountWidth = 800, sideMountLength = 150, sideMountSegments = 100;
-  const rightPlane = createPulseMountPlane(numPulses, sideMountWidth, sideMountLength, sideMountSegments, -5, 50, sideMountWidth/2, 20);
-  rightPlane.position.set(-50, laneElevation, laneLength);
-  scene.add(rightPlane);
-})();
+    (function(){
+      const numPulses = 300, sideMountWidth = 800, sideMountLength = 150, sideMountSegments = 80;
+      const leftPlane = createPulseMountPlane(numPulses, sideMountWidth, sideMountLength, sideMountSegments, -5, -sideMountWidth/2, -50, 20);
+      leftPlane.position.set(50, laneElevation, laneLength);
+      scene.add(leftPlane);
+    })();
+    (function(){
+      const numPulses = 300, sideMountWidth = 800, sideMountLength = 150, sideMountSegments = 100;
+      const rightPlane = createPulseMountPlane(numPulses, sideMountWidth, sideMountLength, sideMountSegments, -5, 50, sideMountWidth/2, 20);
+      rightPlane.position.set(-50, laneElevation, laneLength);
+      scene.add(rightPlane);
+    })();
 
     // -------------------------
     // TARGETING ARROWS (Approach Markers)
@@ -325,10 +270,10 @@
       function createArrowMarker(x, z){
         const geom = new THREE.BufferGeometry();
         const vertices = new Float32Array([
-          0,0,0,
+          0, 0, 0,
           -arrowWidth/2, 0, arrowLength,
           arrowWidth/2, 0, arrowLength,
-          0,0,0
+          0, 0, 0
         ]);
         geom.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
         const mat = new THREE.LineBasicMaterial({ color: 0xff00ff });
@@ -338,8 +283,7 @@
       }
       arrowSpecs.forEach(spec => {
         const x = (spec.board-20)*boardUnit;
-        const arrow = createArrowMarker(x, spec.z);
-        arrowGroup.add(arrow);
+        arrowGroup.add(createArrowMarker(x, spec.z));
       });
     })();
 
@@ -363,7 +307,7 @@
     })();
 
     // -------------------------
-    // BOWLING PINS (3D, Wireframe)
+    // BOWLING PINS (Wireframe)
     // -------------------------
     function pinRadius(y){
       let term = 1 - 2*Math.pow(1.5*y-2,2)*Math.sin(y-2);
@@ -383,11 +327,9 @@
     const pinMatGlobal = new THREE.LineBasicMaterial({ color: 0xff00ff });
     const maxPinR = pinRadius(0);
     const pinScale = boardWidth/(2*maxPinR);
-
     const pinGroup = new THREE.Group();
     pinGroup.position.y = laneElevation;
     scene.add(pinGroup);
-
     (function createPins(){
       const rowCount = 4;
       const spacing = 0.5;
@@ -406,50 +348,29 @@
     })();
 
     // -------------------------
-    // BOWLING BALL (Wireframe Sphere)
+    // BOWLING BALL (Wireframe Sphere) & TRACER EFFECT
     // -------------------------
+    const ballColor = 0xff6666;
     const ballGeometry = new THREE.SphereGeometry(ballRadius, 16, 16);
     const ballWireGeo = new THREE.WireframeGeometry(ballGeometry);
-    const ballMat = new THREE.LineBasicMaterial({ color: 0x00ffff });
+    const ballMat = new THREE.LineBasicMaterial({ color: ballColor });
     const ballMesh = new THREE.LineSegments(ballWireGeo, ballMat);
     ballMesh.position.set(0, laneElevation+ballRadius, 1);
+    // Set a higher render order so the ball appears above ghost copies.
+    ballMesh.renderOrder = 2;
     scene.add(ballMesh);
+
+    // Ghost tracer effect: maintain a list of ghost copies of the ball.
+    // Adjust 'tracerLifetime' to change how long each ghost lasts.
+    const tracerGhosts = [];
+    const tracerLifetime = 0.7; // seconds – increase for a longer-lasting tracer.
+    let frameCount = 0;
 
     // -------------------------
     // BALL STATE & SIMULATION LOGIC
     // -------------------------
-    const arrowGroupChildren = arrowGroup.children;
-    const selectedTarget = arrowGroupChildren[2]; // e.g., 3rd arrow => board 15
-
-    const ballState = {
-      velocity: new THREE.Vector3(0,0,0),
-      inGutter: false,
-      isSpare: false
-    };
-
-    const breakPoint = 35;
-    const hookFactor = -0.0002675;
-
-    function resetPins(){
-      while(pinGroup.children.length>0){
-        pinGroup.remove(pinGroup.children[0]);
-      }
-      const rowCount = 4;
-      const spacing = 0.5;
-      for(let i=0; i<rowCount; i++){
-        const pinsInRow = i+1;
-        const rowZ = pinHeadZ + i*rowSpacing;
-        for(let j=0; j<pinsInRow; j++){
-          const offset = (j - (pinsInRow-1)/2)*spacing;
-          const wireGeo = new THREE.WireframeGeometry(pinGeometry);
-          const pinMesh = new THREE.LineSegments(wireGeo, pinMatGlobal);
-          pinMesh.scale.set(pinScale, pinScale, pinScale);
-          pinMesh.position.set(offset, 0, rowZ);
-          pinGroup.add(pinMesh);
-        }
-      }
-    }
-
+    // Use the third arrow as the target.
+    const selectedTarget = arrowGroup.children[2];
     function resetBall(){
       ballMesh.position.set(0, laneElevation+ballRadius, 1);
       const startPos = ballMesh.position.clone();
@@ -461,43 +382,77 @@
       dir.multiplyScalar(speedMag);
       ballState.velocity.copy(dir);
       ballState.inGutter = false;
+      // Clear tracer ghosts.
+      tracerGhosts.forEach(obj => scene.remove(obj.mesh));
+      tracerGhosts.length = 0;
     }
+    const ballState = {
+      velocity: new THREE.Vector3(0, 0, 0),
+      inGutter: false,
+      isSpare: false
+    };
+    const breakPoint = 35;
+    const hookFactor = -0.0002675;
 
     // -------------------------
     // ANIMATION LOOP
     // -------------------------
-    function animate(){
+    function animate() {
       requestAnimationFrame(animate);
+      frameCount++;
       ballMesh.position.add(ballState.velocity);
-      if(ballMesh.position.z > breakPoint && !ballState.inGutter){
+      
+      // Ball physics.
+      if(ballMesh.position.z > breakPoint && !ballState.inGutter) {
         ballState.velocity.x -= hookFactor;
       }
-      if(!ballState.inGutter){
-        if(Math.abs(ballMesh.position.x) > laneWidth/2){
+      if(!ballState.inGutter) {
+        if(Math.abs(ballMesh.position.x) > laneWidth/2) {
           ballState.inGutter = true;
         }
       } else {
         ballState.velocity.y -= 0.001;
       }
-      if(ballMesh.position.y < laneElevation-1){
+      if(ballMesh.position.y < laneElevation-1 || ballMesh.position.z > platformLength) {
         resetBall();
       }
-      if(ballMesh.position.z > pinHeadZ+1 && Math.abs(ballMesh.position.x) <= laneWidth/2 && !ballState.inGutter){
-        const strike = Math.random() > 0.3;
-        if(!strike && !ballState.isSpare){
-          ballState.isSpare = true;
-        } else {
-          ballState.isSpare = false;
-          resetPins();
-        }
-        resetBall();
-      }
-      if(ballMesh.position.z > platformLength){
-        resetBall();
-      }
+      
+    // TRACER GHOST SPAWNING:
+if(frameCount % 3 === 0) {
+  const ghost = ballMesh.clone();
+  ghost.material = new THREE.LineBasicMaterial({
+    color: 0x6f00ff,
+    transparent: true,
+    opacity: 0.75, // Starting opacity.
+    blending: THREE.NormalBlending // Try NormalBlending instead of AdditiveBlending.
+  });
+  ghost.material.depthTest = false;
+  ghost.material.depthWrite = false;
+  ghost.renderOrder = 0;
+  ghost.position.copy(ballMesh.position);
+  tracerGhosts.push({ mesh: ghost, birthTime: performance.now() / 1000 });
+  scene.add(ghost);
+}
+
+// Update ghost opacities and brightness.
+const currentTime = performance.now() / 1000;
+for (let i = tracerGhosts.length - 1; i >= 0; i--) {
+  const tracer = tracerGhosts[i];
+  const age = currentTime - tracer.birthTime;
+  const newFactor = 1 - (age / tracerLifetime);
+  if (newFactor <= 0) {
+    scene.remove(tracer.mesh);
+    tracerGhosts.splice(i, 1);
+  } else {
+    tracer.mesh.material.opacity = newFactor;
+    tracer.mesh.material.color = new THREE.Color(ballColor).multiplyScalar(newFactor);
+    tracer.mesh.material.needsUpdate = true; // Force update so changes take effect.
+  }
+}
+
+      
       composer.render();
     }
-
     resetBall();
     animate();
 
@@ -505,7 +460,7 @@
     // HANDLE WINDOW RESIZE
     // -------------------------
     window.addEventListener("resize", ()=>{
-      camera.aspect = window.innerWidth/window.innerHeight;
+      camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       composer.setSize(window.innerWidth, window.innerHeight);
