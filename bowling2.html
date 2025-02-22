@@ -237,57 +237,73 @@
     // -------------------------
     // PULSE-BASED SIDE MOUNTAINS
     // -------------------------
-    function createPulseMountPlane(numPulses, width, length, segments, baselineOffset=-2, minPulseX=-width/2, maxPulseX=width/2, margin=0) {
-      const effectiveMin = minPulseX+margin;
-      const effectiveMax = maxPulseX-margin;
-      const pulses = [];
-      for (let i=0; i<numPulses; i++){
-        const cx = effectiveMin + Math.random()*(effectiveMax-effectiveMin);
-        const cy = (Math.random()-0.5)*length;
-        const amp = 5+Math.random()*4;
-        const freq = 0.01+Math.random()*0.02;
-        pulses.push({cx,cy,amp,freq});
-      }
-      const geom = new THREE.PlaneGeometry(width, length, segments, segments);
-      const pos = geom.attributes.position;
-      for (let i=0; i<pos.count; i++){
-        const x = pos.getX(i);
-        const y = pos.getY(i);
-        let zVal = 0;
-        for (const p of pulses){
-          const dx = x-p.cx;
-          const dy = y-p.cy;
-          const dist2 = dx*dx+dy*dy;
-          zVal += p.amp*Math.exp(-dist2*p.freq);
-        }
-        pos.setZ(i, baselineOffset+zVal);
-      }
-      pos.needsUpdate = true;
-      geom.rotateX(-Math.PI/2);
-      const fillMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
-      const fillMesh = new THREE.Mesh(geom, fillMat);
-      const wireGeo = new THREE.WireframeGeometry(geom);
-      const wireMat = new THREE.LineBasicMaterial({ color: 0x8a2be2 });
-      const wireMesh = new THREE.LineSegments(wireGeo, wireMat);
-      const group = new THREE.Group();
-      group.add(fillMesh);
-      group.add(wireMesh);
-      return group;
+    function createPulseMountPlane(numPulses, width, length, segments, baselineOffset = -2, minPulseX = -width/2, maxPulseX = width/2, margin = 0) {
+  const effectiveMin = minPulseX + margin;
+  const effectiveMax = maxPulseX - margin;
+  const pulses = [];
+  for (let i = 0; i < numPulses; i++){
+    const cx = effectiveMin + Math.random() * (effectiveMax - effectiveMin);
+    const cy = (Math.random() - 0.5) * length;
+    const amp = 5 + Math.random() * 4;
+    const freq = 0.01 + Math.random() * 0.02;
+    pulses.push({ cx, cy, amp, freq });
+  }
+  
+  const geom = new THREE.PlaneGeometry(width, length, segments, segments);
+  const pos = geom.attributes.position;
+  for (let i = 0; i < pos.count; i++){
+    const x = pos.getX(i);
+    const y = pos.getY(i);
+    let zVal = 0;
+    for (const p of pulses){
+      const dx = x - p.cx;
+      const dy = y - p.cy;
+      const dist2 = dx * dx + dy * dy;
+      zVal += p.amp * Math.exp(-dist2 * p.freq);
     }
+    pos.setZ(i, baselineOffset + zVal);
+  }
+  pos.needsUpdate = true;
+  geom.rotateX(-Math.PI/2);
 
-    (function(){
-      const numPulses = 300, sideMountWidth = 800, sideMountLength = 150, sideMountSegments = 80;
-      const leftPlane = createPulseMountPlane(numPulses, sideMountWidth, sideMountLength, sideMountSegments, -5, -sideMountWidth/2, -50, 20);
-      leftPlane.position.set(50, laneElevation, laneLength);
-      scene.add(leftPlane);
-    })();
+  // Create the filled mesh (non-glowing)
+  const fillMat = new THREE.MeshBasicMaterial({ color: 0x000000, side: THREE.DoubleSide });
+  const fillMesh = new THREE.Mesh(geom, fillMat);
 
-    (function(){
-      const numPulses = 300, sideMountWidth = 800, sideMountLength = 150, sideMountSegments = 100;
-      const rightPlane = createPulseMountPlane(numPulses, sideMountWidth, sideMountLength, sideMountSegments, -5, 50, sideMountWidth/2, 20);
-      rightPlane.position.set(-50, laneElevation, laneLength);
-      scene.add(rightPlane);
-    })();
+  // Create the wireframe grid.
+  const wireGeo = new THREE.WireframeGeometry(geom);
+  const wireMat = new THREE.LineBasicMaterial({
+    color: new THREE.Color(0x8a2be2), // base purple
+    linewidth: 1,
+    toneMapped: false,
+    transparent: true,
+    blending: THREE.AdditiveBlending
+  });
+  const wireMesh = new THREE.LineSegments(wireGeo, wireMat);
+  // Offset the grid slightly upward to avoid z-clipping with the fill mesh.
+  wireMesh.position.y += 0.01;
+
+  const group = new THREE.Group();
+  group.add(fillMesh);
+  group.add(wireMesh);
+  return group;
+}
+
+// Create the left side mountain plane.
+(function(){
+  const numPulses = 300, sideMountWidth = 800, sideMountLength = 150, sideMountSegments = 80;
+  const leftPlane = createPulseMountPlane(numPulses, sideMountWidth, sideMountLength, sideMountSegments, -5, -sideMountWidth/2, -50, 20);
+  leftPlane.position.set(50, laneElevation, laneLength);
+  scene.add(leftPlane);
+})();
+
+// Create the right side mountain plane.
+(function(){
+  const numPulses = 300, sideMountWidth = 800, sideMountLength = 150, sideMountSegments = 100;
+  const rightPlane = createPulseMountPlane(numPulses, sideMountWidth, sideMountLength, sideMountSegments, -5, 50, sideMountWidth/2, 20);
+  rightPlane.position.set(-50, laneElevation, laneLength);
+  scene.add(rightPlane);
+})();
 
     // -------------------------
     // TARGETING ARROWS (Approach Markers)
